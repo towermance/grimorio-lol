@@ -70,7 +70,7 @@
           <img id="avatarMeu" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20 flex-shrink-0">
           <div class="flex-1">
             <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Você joga de:</label>
-            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Aatrox, Ahri..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
+            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Teemo, Aatrox..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
           </div>
         </div>
 
@@ -243,7 +243,7 @@
       '1055': 'Lâmina de Doran', '1054': 'Escudo de Doran',
       '1056': 'Anel de Doran', '2033': 'Poção Corrupta',
       '3070': 'Lágrima da Deusa', '1036': 'Espada Longa',
-      '1082': 'Lacre Sombrio', '1039': 'Cria-Caminho'
+      '1082': 'Lacre Sombrio', '1039': 'Item da Selva'
     };
 
     function atualizarAvatar(inputId, imgId) {
@@ -329,35 +329,45 @@
       return JSON.parse(limpo);
     }
 
-    // DESCOBERTA AUTOMÁTICA DO MODELO REAL ATIVO NA SUA CHAVE GROQ
+    // RESOLVE OS MODELOS DISPONÍVEIS E APLICA REGRAS RÍGIDAS DE JOGO
     async function dispararRequisicaoGroq(chave, meu, opo, rota) {
-      const systemPrompt = `Você é um analista Challenger de League of Legends. Retorne ESTRITAMENTE um objeto JSON válido (sem introduções, sem markdown) com a seguinte estrutura:
+      const feitiçosPermitidos = rota === 'JUNGLE' 
+        ? '"SummonerFlash" | "SummonerSmite" | "SummonerDot" | "SummonerHaste"'
+        : '"SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal" (NUNCA SummonerSmite fora da selva!)';
+
+      const systemPrompt = `Você é um Treinador Challenger de League of Legends. Analise a match e gere um JSON puro (sem markdown, sem introduções).
+Regras Obrigatórias:
+1. Rota analisada: ${rota}.
+2. Se a rota NÃO for JUNGLE, NUNCA use SummonerSmite. Feitiços válidos para esta rota: ${feitiçosPermitidos}.
+3. itemInicial deve ser estritamente um código numérico de item de começo de jogo: "1055" (Lâmina Doran), "1054" (Escudo Doran), "1056" (Anel Doran), "2033" (Poção Corrupta), "1036" (Espada Longa), "1082" (Lacre) ou "1039" (Apenas para Jungle).
+4. itemPrioritario deve ser o NOME REAL COMPLETO do primeiro grande item lendário fechado (ex: "Dente de Na'Shor", "Criafendas", "Cutelo Negro", "Espada do Rei Destruído"). Não use códigos numéricos aqui.
+5. Não cite códigos de IDs (ex: "1056", "1039") dentro dos textos de onda, early ou regra. Use linguagem tática clara de League of Legends.
+
+Estrutura JSON esperada:
 {
   "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
-  "spell1": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
-  "spell2": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
-  "itemInicial": "1055" | "1054" | "1056" | "2033" | "1036" | "1082" | "1039",
-  "runaPrincipal": "Nome da Runa Chave ideal com breve justificativa de 5 palavras",
-  "itemPrioritario": "Primeiro item fechado prioritário para anular o oponente",
-  "powerSpike": "Momento exato de força no duelo (ex: Nível 2, Nível 6, 1º Item)",
-  "lutasObjetivos": "Postura nas lutas de dragão/barão e rota lateral",
-  "onda": "Instrução tática objetiva de controle de onda de tropas",
-  "early": "Guia prático de postura e trocas nos níveis 1 ao 3",
-  "regra": "Habilidade crítica do oponente para desviar ou segredo essencial da vitória"
+  "spell1": "SummonerFlash",
+  "spell2": "SummonerTeleport" | "SummonerDot" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "itemInicial": "1054" | "1055" | "1056" | "2033" | "1036" | "1082",
+  "runaPrincipal": "Nome da Runa Chave (ex: Ritmo Fatal, Conquistador, Eletrocutar, Agilidade nos Pés) + motivo curto",
+  "itemPrioritario": "Nome completo do 1º item fechado",
+  "powerSpike": "Momento exato de pico de poder (ex: Nível 2, Nível 6, 1º Item)",
+  "lutasObjetivos": "Postura nas lutas de dragão/barão e split push",
+  "onda": "Gestão de tropas ideal (slow push, freeze, bater para puxar)",
+  "early": "Como se comportar nas trocas nos níveis 1 ao 3",
+  "regra": "Habilidade essencial a desviar ou gatilho de vitória"
 }`;
 
-      const userPrompt = `Analise detalhadamente o confronto: Jogador joga de ${meu} contra ${opo} na rota ${rota}.`;
+      const userPrompt = `Duelo: ${meu} contra ${opo} na rota ${rota}. Retorne o plano tático em JSON.`;
 
       let modelosCandidatos = [];
 
-      // 1. Obtém a lista oficial de modelos autorizados na sua chave
       try {
         const resModels = await fetch('https://api.groq.com/openai/v1/models', {
           headers: { 'Authorization': `Bearer ${chave}` }
         });
         const dataModels = await resModels.json();
         if (dataModels.data && Array.isArray(dataModels.data)) {
-          // Filtra modelos de chat excluindo modelos de áudio (whisper) e de moderação
           modelosCandidatos = dataModels.data
             .map(m => m.id)
             .filter(id => !id.includes('whisper') && !id.includes('guard'));
@@ -370,7 +380,6 @@
 
       let ultimoErro = '';
 
-      // 2. Dispara o pedido com o primeiro modelo ativo disponível
       for (const modelo of modelosCandidatos) {
         try {
           const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -439,17 +448,25 @@
         const respostaTexto = await dispararRequisicaoGroq(chave, meu, opo, rota);
         const analise = extrairJsonPuro(respostaTexto);
 
+        // Sanidade preventiva caso o modelo tente inventar Smite fora da selva
+        let sp1 = analise.spell1 || 'SummonerFlash';
+        let sp2 = analise.spell2 || 'SummonerTeleport';
+        if (rota !== 'JUNGLE') {
+          if (sp1 === 'SummonerSmite') sp1 = 'SummonerFlash';
+          if (sp2 === 'SummonerSmite') sp2 = 'SummonerTeleport';
+        }
+
         const novoConfronto = {
           id: Date.now().toString(),
           meuCampeao: meu,
           oponente: opo,
           rota: rota,
           dificuldade: analise.dificuldade || 'Média',
-          spell1: analise.spell1 || 'SummonerFlash',
-          spell2: analise.spell2 || 'SummonerTeleport',
-          itemInicial: analise.itemInicial || '1055',
+          spell1: sp1,
+          spell2: sp2,
+          itemInicial: analise.itemInicial || '1054',
           runaPrincipal: analise.runaPrincipal || 'Adapte ao seu estilo de jogo.',
-          itemPrioritario: analise.itemPrioritario || 'Item mítico/lendário principal padrão.',
+          itemPrioritario: analise.itemPrioritario || 'Item Lendário Principal',
           powerSpike: analise.powerSpike || 'Nível 6',
           lutasObjetivos: analise.lutasObjetivos || 'Lute agrupado com foco no carregador adversário.',
           onda: analise.onda || 'Não informado.',
