@@ -39,7 +39,7 @@
       
       <!-- BOTÕES DE CONFIGURAÇÃO E BACKUP -->
       <div class="flex items-center gap-2">
-        <button onclick="abrirModalChaveIA()" id="btnConfigIA" title="Configurar Chave Gemini IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+        <button onclick="abrirModalChaveIA(false)" id="btnConfigIA" title="Configurar Chave Gemini IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
           <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
           <span id="textoStatusChave">Configurar Chave IA</span>
         </button>
@@ -133,32 +133,65 @@
 
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL DE CONFIGURAÇÃO DE CHAVE IA -->
-  <div id="modalChaveIA" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-hexcard border border-hexborder w-full max-w-md rounded-2xl p-6 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
-        <div class="flex items-center gap-2">
-          <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
-          <h3 class="text-base font-bold text-hexgold">Chave do Gemini IA</h3>
+  <!-- MODAL DE ATIVAÇÃO DA CHAVE GEMINI IA (OBRIGATÓRIO / EXPLICATIVO) -->
+  <div id="modalChaveIA" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-hexcard border-2 border-amber-500/40 w-full max-w-lg rounded-2xl p-6 md:p-7 shadow-2xl relative">
+      
+      <!-- BOTÃO DE FECHAR (OCULTO CASO SEJA A PRIMEIRA VISITA OBRIGATÓRIA) -->
+      <button id="btnFecharModalChave" onclick="fecharModalChaveIA()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 border-b border-hexborder/80 pb-4 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0">
+          <i data-lucide="key" class="w-5 h-5"></i>
         </div>
-        <button onclick="fecharModalChaveIA()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-      <div class="space-y-4 text-xs">
-        <p class="text-slate-300 leading-relaxed">
-          O Grimório consulta o modelo oficial Gemini para gerar o plano de jogo de qualquer campeão. A chave fica guardada apenas no seu computador.
-        </p>
         <div>
-          <label class="block text-slate-400 mb-1 font-semibold">Chave de API (começa com AIza...)</label>
-          <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm text-amber-200 focus:border-hexgold focus:outline-none">
+          <h3 class="text-base font-bold text-slate-100">Ativação do Oráculo IA</h3>
+          <p class="text-xs text-amber-400 font-medium">100% Gratuito • Sem necessidade de plano pago</p>
         </div>
-        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
-          <p class="font-semibold text-slate-300">Como obter sua chave gratuita:</p>
-          <p>1. Acesse <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 hover:underline">aistudio.google.com</a> com sua conta Google.</p>
-          <p>2. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong> e cole acima.</p>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <!-- AVISO DE TRANQUILIZAÇÃO (CUSTO ZERO E ESPAÇO) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
+            <div class="flex items-center gap-1.5 text-emerald-400 font-bold text-xs mb-1">
+              <i data-lucide="check-circle-2" class="w-4 h-4"></i> Custo Zero ($0)
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              <strong>Não é necessário contratar o plano Premium.</strong> A Google disponibiliza até 1.500 consultas gratuitas todos os dias pelo AI Studio.
+            </p>
+          </div>
+
+          <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-3">
+            <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-xs mb-1">
+              <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              O sistema salva apenas texto leve no seu próprio navegador (alguns kilobytes). Seu celular ou PC <strong>não ficam pesados</strong>.
+            </p>
+          </div>
         </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="fecharModalChaveIA()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="button" onclick="salvarChaveIA()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Salvar Chave</button>
+
+        <div>
+          <label class="block text-slate-300 mb-1 font-semibold">Cole sua Chave do Gemini (começa com AIza...):</label>
+          <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-[#0a0e17] border border-amber-500/40 rounded-lg px-3 py-2.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none shadow-inner">
+        </div>
+
+        <!-- PASSO A PASSO RÁPIDO COM LINK DIRETO -->
+        <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
+          <p class="font-bold text-slate-200">Como pegar a sua chave em 1 minuto:</p>
+          <p>1. Abra o site oficial gratuito: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
+          <p>2. Entre com sua conta Google comum.</p>
+          <p>3. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong>, copie e cole no campo acima.</p>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <span class="text-[10px] text-slate-500">A chave fica gravada apenas no seu navegador.</span>
+          <button type="button" onclick="salvarChaveIA()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-black text-xs px-6 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4"></i> Ativar Grimório
+          </button>
         </div>
       </div>
     </div>
@@ -229,31 +262,51 @@
       }
     }
 
-    // GESTÃO DE CHAVE GEMINI
+    // GESTÃO DE CHAVE GEMINI COM OBRIGATORIEDADE
     function obterChaveIA() {
       return localStorage.getItem('grimorio_gemini_api_key') || '';
     }
 
-    function abrirModalChaveIA() {
+    function abrirModalChaveIA(obrigatorio = false) {
       document.getElementById('inputApiKey').value = obterChaveIA();
+      const btnFechar = document.getElementById('btnFecharModalChave');
+      if (obrigatorio) {
+        btnFechar.classList.add('hidden');
+      } else {
+        btnFechar.classList.remove('hidden');
+      }
       document.getElementById('modalChaveIA').classList.remove('hidden');
+      lucide.createIcons();
     }
 
     function fecharModalChaveIA() {
+      if (!obterChaveIA()) {
+        alert('O Grimório necessita da chave gratuita do Gemini para funcionar. Por favor, cole a sua chave para continuar.');
+        return;
+      }
       document.getElementById('modalChaveIA').classList.add('hidden');
     }
 
     function salvarChaveIA() {
       const chave = document.getElementById('inputApiKey').value.trim();
-      if (chave) {
-        localStorage.setItem('grimorio_gemini_api_key', chave);
-        alert('Chave salva com sucesso!');
-      } else {
-        localStorage.removeItem('grimorio_gemini_api_key');
-        alert('Chave removida.');
+      if (!chave || chave.length < 15) {
+        alert('Por favor, cole uma chave válida obtida gratuitamente no Google AI Studio (começa com AIza...).');
+        return;
       }
-      fecharModalChaveIA();
+
+      localStorage.setItem('grimorio_gemini_api_key', chave);
+      document.getElementById('modalChaveIA').classList.add('hidden');
       atualizarStatusChave();
+      alert('Chave ativada com sucesso! O Grimório está pronto para uso.');
+    }
+
+    function verificarChaveNaInicializacao() {
+      if (!obterChaveIA()) {
+        // Primeira visita sem chave: força a abertura do modal explicativo
+        abrirModalChaveIA(true);
+      } else {
+        atualizarStatusChave();
+      }
     }
 
     function atualizarStatusChave() {
@@ -275,8 +328,7 @@
     async function invocarOraculoIA() {
       const chave = obterChaveIA();
       if (!chave) {
-        alert('Configure sua Chave Gemini gratuita no topo antes de consultar a IA!');
-        abrirModalChaveIA();
+        abrirModalChaveIA(true);
         return;
       }
 
@@ -504,7 +556,7 @@ Regra Crítica: ${m.regra}`;
     }
 
     // INICIALIZAÇÃO
-    atualizarStatusChave();
+    verificarChaveNaInicializacao();
     renderizarHistorico();
   </script>
 </body>
