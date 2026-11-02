@@ -318,6 +318,47 @@
       }
     }
 
+    // DISPARO COM SISTEMA DE FALLBACK AUTOMÁTICO DE MODELOS
+    async function dispararRequisicaoGemini(chave, prompt) {
+      // Modelos ordenados por estabilidade e velocidade na API v1beta
+      const modelos = [
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro'
+      ];
+
+      let ultimoErro = '';
+
+      for (const modelo of modelos) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
+          }
+
+          // Se for erro de cota/alta demanda, tenta o próximo modelo da lista
+          if (data.error) {
+            ultimoErro = data.error.message;
+            console.warn(`Modelo ${modelo} indisponível: ${ultimoErro}. Tentando modelo reserva...`);
+          }
+        } catch (e) {
+          ultimoErro = e.message;
+          console.warn(`Erro de conexão no modelo ${modelo}: ${ultimoErro}`);
+        }
+      }
+
+      throw new Error(ultimoErro || 'Servidores do Gemini em alta demanda. Tente novamente em alguns segundos.');
+    }
+
     async function invocarOraculoIA() {
       const chave = obterChaveIA();
       if (!chave) {
@@ -363,21 +404,7 @@ Retorne ESTRITAMENTE um JSON puro (sem markdown, sem crases, sem introduções) 
 }`;
 
       try {
-        // Modelo atualizado para gemini-3.8-flash conforme especificação oficial da Google
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${chave}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.error?.message || 'Chave inválida, sem permissão ou cota esgotada.');
-        }
-
-        let respostaTexto = data.candidates[0].content.parts[0].text.trim();
+        let respostaTexto = await dispararRequisicaoGemini(chave, prompt);
         respostaTexto = respostaTexto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
 
         const analise = JSON.parse(respostaTexto);
