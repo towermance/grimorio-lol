@@ -154,7 +154,7 @@
               <i data-lucide="check-circle-2" class="w-4 h-4"></i> Custo Zero ($0)
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              <strong>Não requer plano pago.</strong> A Google disponibiliza cotas gratuitas todos os dias pelo AI Studio.
+              <strong>Não requer plano pago.</strong> A Google disponibiliza cotas gratuitas diárias pelo AI Studio.
             </p>
           </div>
 
@@ -163,7 +163,7 @@
               <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              O sistema salva apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou celular <strong>não ficam lentos</strong>.
+              O sistema guarda apenas texto leve no seu navegador (alguns kilobytes). O seu dispositivo <strong>não fica lento</strong>.
             </p>
           </div>
         </div>
@@ -175,8 +175,8 @@
 
         <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
           <p class="font-bold text-slate-200">Como obter a chave gratuita em 1 minuto:</p>
-          <p>1. Acesse o site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
-          <p>2. Inicie sessão com sua conta Google.</p>
+          <p>1. Aceda ao site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
+          <p>2. Inicie sessão com a sua conta Google.</p>
           <p>3. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong>, copie e cole acima.</p>
         </div>
 
@@ -314,9 +314,8 @@
       }
     }
 
-    // EXTRAI APENAS O BLOCO JSON DE UMA RESPOSTA DE TEXTO COM SEGURANÇA
     function extrairJsonPuro(texto) {
-      if (!texto) return null;
+      if (!texto) throw new Error('Resposta vazia da IA.');
       let limpo = texto.trim();
       limpo = limpo.replace(/```json/gi, '').replace(/```/g, '').trim();
 
@@ -328,12 +327,12 @@
       return JSON.parse(limpo);
     }
 
-    // DISPARO INTELIGENTE COM MODO JSON ATIVO
+    // CHAMADA COM OS MODELOS ATIVOS RECOMENDADOS PELA GOOGLE
     async function dispararRequisicaoGemini(chave, prompt) {
       const modelos = [
+        'gemini-3.8-flash',
         'gemini-1.5-flash',
-        'gemini-1.5-pro',
-        'gemini-2.5-flash'
+        'gemini-1.5-pro'
       ];
 
       let ultimoErro = '';
@@ -397,21 +396,24 @@
       btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> O Oráculo está analisando...`;
       btn.disabled = true;
 
-      const prompt = `Analise o confronto de League of Legends:
+      const prompt = `Analise o confronto no League of Legends:
 Jogador: ${meu}
 Oponente: ${opo}
 Rota: ${rota}
 
-Responda preenchendo este JSON exato:
+Responda preenchendo obrigatoriamente este formato JSON:
 {
-  "dificuldade": "Fácil" ou "Média" ou "Difícil" ou "Muito Difícil",
-  "spell1": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
-  "spell2": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
-  "itemInicial": "1055" ou "1054" ou "1056" ou "2033" ou "1036" ou "1082" ou "1039",
-  "onda": "instrução objetiva sobre gestão de onda",
-  "early": "dica prática de troca nos níveis 1 ao 3",
-  "regra": "habilidade crítica do oponente para esquivar ou condição de vitória"
-}`;
+  "dificuldade": "Fácil",
+  "spell1": "SummonerFlash",
+  "spell2": "SummonerDot",
+  "itemInicial": "1055",
+  "onda": "como gerir as tropas",
+  "early": "como trocar dano nos níveis 1 a 3",
+  "regra": "habilidade crítica a esquivar ou segredo do duelo"
+}
+Valores aceitos em dificuldade: Fácil, Média, Difícil, Muito Difícil.
+Valores aceitos em spell1 e spell2: SummonerFlash, SummonerDot, SummonerTeleport, SummonerHaste, SummonerSmite, SummonerBarrier, SummonerExhaust, SummonerHeal.
+Valores aceitos em itemInicial: 1055 (Lâmina), 1054 (Escudo), 1056 (Anel), 2033 (Poção), 1036 (Espada Longa), 1082 (Lacre), 1039 (Jungle).`;
 
       try {
         const respostaTexto = await dispararRequisicaoGemini(chave, prompt);
