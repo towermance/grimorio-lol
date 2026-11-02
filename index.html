@@ -24,7 +24,7 @@
 </head>
 <body class="bg-hexbg text-slate-100 min-h-screen font-sans selection:bg-amber-500/30 selection:text-amber-200">
 
-  <!-- TOPO COMPACTO -->
+  <!-- CABEÇALHO -->
   <header class="border-b border-hexborder/60 bg-[#0b111e]/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -37,7 +37,6 @@
         </div>
       </div>
       
-      <!-- BOTÕES DE CONFIGURAÇÃO E LIMPEZA -->
       <div class="flex items-center gap-2">
         <button onclick="abrirModalChaveIA(false)" id="btnConfigIA" title="Configurar Chave Gemini IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
           <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -52,7 +51,7 @@
 
   <main class="max-w-5xl mx-auto px-4 py-8">
     
-    <!-- ÁREA PRINCIPAL: O ARENA SELECTOR -->
+    <!-- SELETOR CENTRAL DE DUELO -->
     <div class="bg-gradient-to-b from-[#121c2e] to-hexcard border border-amber-500/30 p-6 md:p-8 rounded-2xl shadow-2xl relative overflow-hidden mb-10">
       <div class="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
       <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -63,15 +62,13 @@
         <p class="text-xs text-slate-400 mt-1">Escolha os dois campeões e a rota para gerar a estratégia completa na hora.</p>
       </div>
 
-      <!-- SELEÇÃO VISUAL DE CAMPEÕES (VS DOCK) -->
       <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
-        
         <!-- O SEU CAMPEÃO -->
         <div class="md:col-span-3 bg-[#0a0e17]/90 border border-amber-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
           <img id="avatarMeu" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20 flex-shrink-0">
           <div class="flex-1">
             <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Você joga de:</label>
-            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Sett, Ahri..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
+            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Akali, Sett..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
           </div>
         </div>
 
@@ -79,9 +76,9 @@
         <div class="md:col-span-1 flex flex-col items-center justify-center gap-1">
           <span class="text-xs font-black tracking-widest text-slate-500">VS</span>
           <select id="rotaDuelo" class="bg-slate-900 border border-hexborder rounded-lg px-2 py-1 text-xs text-slate-300 font-bold focus:outline-none focus:border-amber-400">
+            <option value="MID">MID</option>
             <option value="TOP">TOP</option>
             <option value="JUNGLE">JG</option>
-            <option value="MID">MID</option>
             <option value="ADC">ADC</option>
             <option value="SUP">SUP</option>
           </select>
@@ -91,22 +88,22 @@
         <div class="md:col-span-3 bg-[#0a0e17]/90 border border-rose-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
           <div class="flex-1 text-right">
             <label class="block text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1">Contra oponente:</label>
-            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Akali, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
+            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Akshan, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
           </div>
           <img id="avatarOpo" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20 flex-shrink-0">
         </div>
       </div>
 
-      <!-- BOTÃO CENTRAL DE CONSULTA IA -->
+      <!-- BOTÃO INVOCAR ORÁCULO -->
       <div class="mt-6 flex justify-center">
         <button onclick="invocarOraculoIA()" id="btnInvocar" class="w-full md:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.99] transition flex items-center justify-center gap-2">
           <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>Consultar Oráculo (IA)</span>
+          <span id="btnInvocarTexto">Consultar Oráculo (IA)</span>
         </button>
       </div>
     </div>
 
-    <!-- ÁREA DE EXIBIÇÃO DO RESULTADO ATIVO DA IA -->
+    <!-- RESULTADO DO PLANO TÁTICO -->
     <div id="blocoResultadoIA" class="hidden mb-12 animate-fade-in">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
@@ -119,7 +116,7 @@
       <div id="cardResultado" class="bg-hexcard border border-amber-500/40 rounded-2xl p-6 shadow-2xl"></div>
     </div>
 
-    <!-- HISTÓRICO DE CONFRONTOS SALVOS -->
+    <!-- HISTÓRICO SALVO -->
     <div>
       <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-2">
         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
@@ -133,10 +130,9 @@
 
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL DE ATIVAÇÃO DA CHAVE GEMINI IA -->
+  <!-- MODAL DE ATIVAÇÃO DA CHAVE -->
   <div id="modalChaveIA" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border-2 border-amber-500/40 w-full max-w-lg rounded-2xl p-6 md:p-7 shadow-2xl relative">
-      
       <button id="btnFecharModalChave" onclick="fecharModalChaveIA()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
@@ -158,7 +154,7 @@
               <i data-lucide="check-circle-2" class="w-4 h-4"></i> Custo Zero ($0)
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              <strong>Não é necessário contratar o plano Premium.</strong> A Google disponibiliza cotas gratuitas diárias pelo AI Studio.
+              <strong>Não requer plano pago.</strong> A Google disponibiliza cotas gratuitas todos os dias pelo AI Studio.
             </p>
           </div>
 
@@ -167,7 +163,7 @@
               <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              O sistema salva apenas texto leve no seu próprio navegador (alguns kilobytes). Seu computador ou telemóvel <strong>não ficam lentos</strong>.
+              O sistema salva apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou telemóvel <strong>não ficam lentos</strong>.
             </p>
           </div>
         </div>
@@ -185,7 +181,7 @@
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <span class="text-[10px] text-slate-500">A chave fica gravada apenas no seu navegador.</span>
+          <span class="text-[10px] text-slate-500">A chave fica guardada apenas no seu navegador.</span>
           <button type="button" onclick="salvarChaveIA()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-black text-xs px-6 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5">
             <i data-lucide="shield-check" class="w-4 h-4"></i> Ativar Grimório
           </button>
@@ -318,66 +314,67 @@
       }
     }
 
-    // RESOLUTOR ROBUSTO DE MODELOS COMPATÍVEIS COM A API DA GOOGLE
+    const aguardar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // DISPARO INTELIGENTE COM DESCOBERTA DE MODELOS E RETRY EM PICOS DE PROCURA
     async function dispararRequisicaoGemini(chave, prompt) {
-      // Lista de endpoints oficiais (v1 e v1beta) para máxima compatibilidade
-      const rotas = [
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent',
-        'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent'
-      ];
+      let listaModelos = [];
+
+      // 1. Descobrir dinamicamente os modelos ativos autorizados na chave
+      try {
+        const resLista = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${chave}`);
+        const dataLista = await resLista.json();
+        if (dataLista.models && Array.isArray(dataLista.models)) {
+          listaModelos = dataLista.models
+            .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+        }
+      } catch (e) {}
+
+      // Modelos de contingência caso a listagem falhe
+      const fallbackModelos = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-3.8-flash'];
+      const modelosParaTentar = [...new Set([...listaModelos, ...fallbackModelos])];
 
       let ultimoErro = '';
 
-      for (const endpoint of rotas) {
-        try {
-          const res = await fetch(`${endpoint}?key=${chave}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          });
-
-          const data = await res.json();
-
-          if (res.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-            return data.candidates[0].content.parts[0].text;
-          }
-
-          if (data.error) {
-            ultimoErro = data.error.message;
-          }
-        } catch (e) {
-          ultimoErro = e.message;
-        }
-      }
-
-      // Se nenhum endpoint direto respondeu, descobre os modelos ativos permitidos para a chave
-      try {
-        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${chave}`);
-        const listData = await listRes.json();
-        if (listData.models && Array.isArray(listData.models)) {
-          const modelosDisponiveis = listData.models.filter(m => m.supportedGenerationMethods?.includes('generateContent'));
-          if (modelosDisponiveis.length > 0) {
-            const nomeModelo = modelosDisponiveis[0].name; // Ex: models/gemini-xxx
-            const dynamicRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${nomeModelo}:generateContent?key=${chave}`, {
+      // 2. Iterar pelos modelos com tentativa de reenvio em caso de 503 (high demand)
+      for (const modelo of modelosParaTentar) {
+        for (let tentativa = 1; tentativa <= 2; tentativa++) {
+          try {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`;
+            const res = await fetch(url, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
             });
-            const dynamicData = await dynamicRes.json();
-            if (dynamicRes.ok && dynamicData.candidates?.[0]?.content?.parts?.[0]?.text) {
-              return dynamicData.candidates[0].content.parts[0].text;
+
+            const data = await res.json();
+
+            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+              return data.candidates[0].content.parts[0].text;
             }
+
+            if (data.error) {
+              ultimoErro = data.error.message;
+              // Se for pico de procura (503 / high demand), aguarda 1,5s antes de insistir
+              if (ultimoErro.includes('high demand') || res.status === 503) {
+                await aguardar(1500);
+                continue;
+              } else {
+                break; // Se for outro erro, passa de imediato ao próximo modelo
+              }
+            }
+          } catch (e) {
+            ultimoErro = e.message;
           }
         }
-      } catch (e) {}
+      }
 
-      throw new Error(ultimoErro || 'Não foi possível ligar à API do Gemini. Tente novamente dentro de instantes.');
+      throw new Error(ultimoErro || 'Servidores em alta procura. Tente novamente dentro de instantes.');
     }
 
     async function invocarOraculoIA() {
-      const chave = obterChaveIA();
+      const chave =破 = obterChaveIA();
       if (!chave) {
         abrirModalChaveIA(true);
         return;
