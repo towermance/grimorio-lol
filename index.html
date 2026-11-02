@@ -163,7 +163,7 @@
               <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              O sistema salva apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou telemóvel <strong>não ficam lentos</strong>.
+              O sistema salva apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou celular <strong>não ficam lentos</strong>.
             </p>
           </div>
         </div>
@@ -175,8 +175,8 @@
 
         <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
           <p class="font-bold text-slate-200">Como obter a chave gratuita em 1 minuto:</p>
-          <p>1. Aceda ao site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
-          <p>2. Inicie sessão com a sua conta Google.</p>
+          <p>1. Acesse o site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
+          <p>2. Inicie sessão com sua conta Google.</p>
           <p>3. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong>, copie e cole acima.</p>
         </div>
 
@@ -314,67 +314,63 @@
       }
     }
 
-    const aguardar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    // EXTRAI APENAS O BLOCO JSON DE UMA RESPOSTA DE TEXTO COM SEGURANÇA
+    function extrairJsonPuro(texto) {
+      if (!texto) return null;
+      let limpo = texto.trim();
+      limpo = limpo.replace(/```json/gi, '').replace(/```/g, '').trim();
 
-    // DISPARO INTELIGENTE COM DESCOBERTA DE MODELOS E RETRY EM PICOS DE PROCURA
+      const inicio = limpo.indexOf('{');
+      const fim = limpo.lastIndexOf('}');
+      if (inicio !== -1 && fim !== -1 && fim > inicio) {
+        limpo = limpo.substring(inicio, fim + 1);
+      }
+      return JSON.parse(limpo);
+    }
+
+    // DISPARO INTELIGENTE COM MODO JSON ATIVO
     async function dispararRequisicaoGemini(chave, prompt) {
-      let listaModelos = [];
-
-      // 1. Descobrir dinamicamente os modelos ativos autorizados na chave
-      try {
-        const resLista = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${chave}`);
-        const dataLista = await resLista.json();
-        if (dataLista.models && Array.isArray(dataLista.models)) {
-          listaModelos = dataLista.models
-            .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-            .map(m => m.name.replace(/^models\//, ''));
-        }
-      } catch (e) {}
-
-      // Modelos de contingência caso a listagem falhe
-      const fallbackModelos = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-3.8-flash'];
-      const modelosParaTentar = [...new Set([...listaModelos, ...fallbackModelos])];
+      const modelos = [
+        'gemini-1.5-flash',
+        'gemini-1.5-pro',
+        'gemini-2.5-flash'
+      ];
 
       let ultimoErro = '';
 
-      // 2. Iterar pelos modelos com tentativa de reenvio em caso de 503 (high demand)
-      for (const modelo of modelosParaTentar) {
-        for (let tentativa = 1; tentativa <= 2; tentativa++) {
-          try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`;
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
-
-            const data = await res.json();
-
-            if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-              return data.candidates[0].content.parts[0].text;
-            }
-
-            if (data.error) {
-              ultimoErro = data.error.message;
-              // Se for pico de procura (503 / high demand), aguarda 1,5s antes de insistir
-              if (ultimoErro.includes('high demand') || res.status === 503) {
-                await aguardar(1500);
-                continue;
-              } else {
-                break; // Se for outro erro, passa de imediato ao próximo modelo
+      for (const modelo of modelos) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: "application/json"
               }
-            }
-          } catch (e) {
-            ultimoErro = e.message;
+            })
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            return data.candidates[0].content.parts[0].text;
           }
+
+          if (data.error) {
+            ultimoErro = data.error.message;
+          }
+        } catch (e) {
+          ultimoErro = e.message;
         }
       }
 
-      throw new Error(ultimoErro || 'Servidores em alta procura. Tente novamente dentro de instantes.');
+      throw new Error(ultimoErro || 'Servidores temporariamente instáveis. Tente novamente em alguns segundos.');
     }
 
     async function invocarOraculoIA() {
-      const chave =破 = obterChaveIA();
+      const chave = obterChaveIA();
       if (!chave) {
         abrirModalChaveIA(true);
         return;
@@ -401,27 +397,26 @@
       btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> O Oráculo está analisando...`;
       btn.disabled = true;
 
-      const prompt = `Você é um analista Challenger e Treinador de League of Legends. Analise detalhadamente o confronto:
+      const prompt = `Analise o confronto de League of Legends:
 Jogador: ${meu}
 Oponente: ${opo}
 Rota: ${rota}
 
-Retorne ESTRITAMENTE um JSON puro (sem markdown, sem crases, sem introduções) com estas chaves exatas:
+Responda preenchendo este JSON exato:
 {
-  "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
-  "spell1": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
-  "spell2": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
-  "itemInicial": "1055" | "1054" | "1056" | "2033" | "1036" | "1082" | "1039",
-  "onda": "Explique o controle de tropas ideal (puxar lento, congelar ou deixar vir)",
-  "early": "Como se comportar nas trocas nos níveis 1 ao 3",
-  "regra": "A habilidade crítica do adversário para esquivar ou o gatilho da vitória no duelo"
+  "dificuldade": "Fácil" ou "Média" ou "Difícil" ou "Muito Difícil",
+  "spell1": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
+  "spell2": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
+  "itemInicial": "1055" ou "1054" ou "1056" ou "2033" ou "1036" ou "1082" ou "1039",
+  "onda": "instrução objetiva sobre gestão de onda",
+  "early": "dica prática de troca nos níveis 1 ao 3",
+  "regra": "habilidade crítica do oponente para esquivar ou condição de vitória"
 }`;
 
       try {
-        let respostaTexto = await dispararRequisicaoGemini(chave, prompt);
-        respostaTexto = respostaTexto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+        const respostaTexto = await dispararRequisicaoGemini(chave, prompt);
+        const analise = extrairJsonPuro(respostaTexto);
 
-        const analise = JSON.parse(respostaTexto);
         const novoConfronto = {
           id: Date.now().toString(),
           meuCampeao: meu,
