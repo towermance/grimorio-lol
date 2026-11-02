@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grimório LoL - Seu Guia Tático de Matchups</title>
-  <!-- Carregamento do Tailwind CSS e Ícones Lucide -->
+  <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -23,13 +23,13 @@
     }
   </script>
 </head>
-<body class="bg-hexbg text-slate-100 min-h-screen font-sans">
+<body class="bg-hexbg text-slate-100 min-h-screen font-sans selection:bg-amber-500/30 selection:text-amber-200">
 
   <!-- TOPO / CABEÇALHO -->
-  <header class="border-b border-hexborder bg-[#0f172a]/80 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-hexborder bg-[#0f172a]/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-black font-black text-lg">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-black font-black text-lg shadow-md shadow-amber-500/20">
           G
         </div>
         <div>
@@ -37,9 +37,23 @@
           <p class="text-xs text-slate-400">Caderno Tático de Confrontos & Counters</p>
         </div>
       </div>
-      <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
-        <i data-lucide="plus-circle" class="w-4 h-4"></i> Novo Matchup
-      </button>
+      
+      <div class="flex items-center gap-2">
+        <!-- BOTÕES DE BACKUP -->
+        <button onclick="exportarDados()" title="Baixar Backup" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
+          <i data-lucide="download" class="w-4 h-4"></i>
+        </button>
+        <label title="Restaurar Backup" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
+          <i data-lucide="upload" class="w-4 h-4"></i>
+          <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
+        </label>
+
+        <!-- NOVO MATCHUP -->
+        <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Novo</span> Matchup
+        </button>
+      </div>
     </div>
   </header>
 
@@ -48,23 +62,26 @@
     <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between">
       <div class="relative w-full md:w-96">
         <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-        <input type="text" id="campoBusca" oninput="renderizarMatchups()" placeholder="Buscar seu campeão ou oponente..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-hexgold">
+        <input type="text" id="campoBusca" oninput="renderizarMatchups()" placeholder="Buscar campeão ou oponente..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-hexgold transition">
       </div>
-      <div class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1">
-        <button onclick="filtrarRota('ALL')" class="btn-rota active px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Todos</button>
-        <button onclick="filtrarRota('TOP')" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Top</button>
-        <button onclick="filtrarRota('JUNGLE')" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Jungle</button>
-        <button onclick="filtrarRota('MID')" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Mid</button>
-        <button onclick="filtrarRota('ADC')" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">ADC</button>
-        <button onclick="filtrarRota('SUP')" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Suporte</button>
+      <div class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1 scrollbar-none">
+        <button onclick="filtrarRota('ALL', this)" class="btn-rota active px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Todos</button>
+        <button onclick="filtrarRota('TOP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Top</button>
+        <button onclick="filtrarRota('JUNGLE', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Jungle</button>
+        <button onclick="filtrarRota('MID', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Mid</button>
+        <button onclick="filtrarRota('ADC', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">ADC</button>
+        <button onclick="filtrarRota('SUP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Suporte</button>
       </div>
     </div>
 
-    <!-- LISTAGEM DE CARDS -->
+    <!-- GRADE DE CARDS -->
     <div id="gradeMatchups" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Os cards são inseridos dinamicamente pelo JavaScript -->
+      <!-- Inserido dinamicamente -->
     </div>
   </main>
+
+  <!-- LISTA DE SUGESTÕES DE CAMPEÕES (DATA LIST) -->
+  <datalist id="listaCampeoes"></datalist>
 
   <!-- MODAL / FORMULÁRIO DE NOVO OU EDIÇÃO DE CONFRONTO -->
   <div id="modalForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -80,11 +97,11 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Seu Campeão</label>
-            <input type="text" id="meuCampeao" required placeholder="Ex: Renekton" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+            <input type="text" id="meuCampeao" list="listaCampeoes" required placeholder="Ex: Renekton" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Campeão Oponente</label>
-            <input type="text" id="oponente" required placeholder="Ex: Aatrox" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+            <input type="text" id="oponente" list="listaCampeoes" required placeholder="Ex: Aatrox" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
           </div>
         </div>
 
@@ -112,29 +129,83 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Controle de Onda (Wave Management)</label>
-          <input type="text" id="onda" placeholder="Ex: Congelar na sua torre até fechar bota de armadura" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+          <input type="text" id="onda" placeholder="Ex: Deixar vir no lvl 1 e congelar perto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Nível 1 a 3 (Início da Rota)</label>
-          <textarea id="early" rows="2" placeholder="Ex: Não troque dano no nível 1. Espere o nível 3 com fúria..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Nível 1 ao 3 (Trocas Iniciais)</label>
+          <textarea id="early" rows="2" placeholder="Ex: Evite trocar no nível 1. Espere o nível 3 com fúria pronta..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Regra de Ouro / Habilidade Chave</label>
-          <textarea id="regra" rows="2" placeholder="Ex: Guarde sempre o traço/dash para desviar da habilidade mais forte dele." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
+          <textarea id="regra" rows="2" placeholder="Ex: Guarde sempre o dash para desviar da habilidade principal dele..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="fecharModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg">Salvar Confronto</button>
+          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Salvar Confronto</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // DADOS INICIAIS PADRÃO CASO O NAVEGADOR ESTEJA LIMPO
+    // VERSÃO E LISTA DO DATA DRAGON RIOT
+    const RIOT_VERSION = '14.10.1';
+    let listaChamps = [];
+
+    // Carrega a lista completa de campeões oficial da Riot
+    async function carregarCampeoesRiot() {
+      try {
+        const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/data/pt_BR/champion.json`);
+        const data = await res.json();
+        listaChamps = Object.keys(data.data);
+        
+        const datalist = document.getElementById('listaCampeoes');
+        datalist.innerHTML = listaChamps.map(c => `<option value="${c}"></option>`).join('');
+      } catch (err) {
+        console.warn('Usando nomes locais para os campeões');
+      }
+    }
+    carregarCampeoesRiot();
+
+    // Normaliza o nome do campeão para bater com o formato da Riot (ex: "Dr. Mundo" -> "DrMundo", "Cho'Gath" -> "Chogath")
+    function tratarNomeRiot(nome) {
+      if (!nome) return '';
+      const limpo = nome.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const mapaEspecial = {
+        'wukong': 'MonkeyKing',
+        'monkeyking': 'MonkeyKing',
+        'nunu': 'Nunu',
+        'nunewillump': 'Nunu',
+        'renata': 'Renata',
+        'renataglasc': 'Renata',
+        'chogath': 'Chogath',
+        'velkoz': 'Velkoz',
+        'kaisa': 'Kaisa',
+        'khazix': 'Khazix',
+        'kogmaw': 'KogMaw',
+        'leblanc': 'Leblanc',
+        'belveth': 'Belveth',
+        'ksante': 'KSante'
+      };
+      if (mapaEspecial[limpo]) return mapaEspecial[limpo];
+
+      // Tenta achar na lista da Riot sem case-sensitive
+      const encontrado = listaChamps.find(c => c.toLowerCase() === limpo);
+      if (encontrado) return encontrado;
+
+      // Capitaliza a primeira letra como fallback
+      return nome.trim().charAt(0).toUpperCase() + nome.trim().slice(1).replace(/\s+/g, '');
+    }
+
+    function getAvatarUrl(nome) {
+      const idRiot = tratarNomeRiot(nome);
+      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/champion/${idRiot}.png`;
+    }
+
+    // DADOS INICIAIS
     const dadosIniciais = [
       {
         id: "1",
@@ -144,7 +215,7 @@
         dificuldade: "Média",
         onda: "Deixe a onda vir no nível 1 e congele perto da sua torre.",
         early: "Evite o Q1 e Q2 dele. No nível 3, entre com E, comba com W fortalecido e volte com E2 antes do Q3 dele cair.",
-        regra: "Comprar bota de armadura ou corta-cura no primeiro retorno à base anula o sustento dele."
+        regra: "Comprar bota de armadura ou corta-cura no primeiro retorno anula o sustento dele."
       },
       {
         id: "2",
@@ -153,8 +224,8 @@
         rota: "MID",
         dificuldade: "Difícil",
         onda: "Pressione no nível 1-2. Do nível 3 em diante, mantenha a onda equilibrada.",
-        early: "Puna ele quando ele usar a sombra (W) para farmar. Sem sombra, ele não tem escape nem dano por 20 segundos.",
-        regra: "Nunca jogue seu Charme (E) à toa no nível 6. Se ele usar a ultimate em você, jogue o E imediatamente atrás do seu próprio boneco."
+        early: "Puna quando ele usar a sombra (W) para farmar. Sem sombra, ele não tem escape nem dano por 20 segundos.",
+        regra: "Se ele ultar em você, jogue o Charme (E) imediatamente para trás do seu próprio campeão."
       },
       {
         id: "3",
@@ -163,8 +234,8 @@
         rota: "TOP",
         dificuldade: "Fácil",
         onda: "Mantenha a onda no meio ou lenta empurrando. Ele não pode se aproximar das tropas.",
-        early: "Quando ele vier dar o Q (ataque giratório com velocidade), acerte o W para desacelerar e guarde seu puxão (E) para quando ele tentar fugir.",
-        regra: "Nunca lute sem puxão disponível perto da torre dele."
+        early: "Quando ele vier dar o Q com velocidade, acerte o W para desacelerar e guarde seu puxão (E) para a fuga dele.",
+        regra: "Nunca force luta sem puxão disponível perto da torre inimiga."
       }
     ];
 
@@ -189,9 +260,10 @@
 
       if (filtrados.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full text-center py-12 text-slate-500">
-            <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-            Nenhum confronto encontrado. Clique em "+ Novo Matchup" para cadastrar!
+          <div class="col-span-full text-center py-16 text-slate-500">
+            <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
+            <p class="font-medium text-slate-400">Nenhum confronto encontrado.</p>
+            <p class="text-xs mt-1">Clique em "+ Novo Matchup" para cadastrar sua primeira estratégia.</p>
           </div>
         `;
         lucide.createIcons();
@@ -206,8 +278,11 @@
           'Muito Difícil': 'text-rose-400 bg-rose-500/10 border-rose-500/20'
         }[m.dificuldade] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
 
+        const imgMeu = getAvatarUrl(m.meuCampeao);
+        const imgOpo = getAvatarUrl(m.oponente);
+
         const card = document.createElement('div');
-        card.className = "bg-hexcard border border-hexborder hover:border-slate-700 rounded-xl p-5 shadow-lg flex flex-col justify-between";
+        card.className = "bg-hexcard border border-hexborder hover:border-amber-500/40 transition duration-200 rounded-xl p-5 shadow-lg flex flex-col justify-between";
         card.innerHTML = `
           <div>
             <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-3">
@@ -216,42 +291,51 @@
                 <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
               </div>
               <div class="flex items-center gap-1">
-                <button onclick="editarMatchup('${m.id}')" class="p-1 text-slate-400 hover:text-amber-400"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                <button onclick="excluirMatchup('${m.id}')" class="p-1 text-slate-400 hover:text-rose-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                <button onclick="excluirMatchup('${m.id}')" title="Excluir" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
             </div>
 
-            <!-- VS BANNER -->
-            <div class="flex items-center justify-around py-3 bg-[#0a0e17]/60 rounded-lg border border-hexborder/40 mb-4">
-              <div class="text-center">
-                <p class="text-xs text-slate-400">Você</p>
-                <p class="text-sm font-bold text-amber-300">${m.meuCampeao}</p>
+            <!-- VS BANNER COM FOTOS OFICIAIS -->
+            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-4">
+              <div class="flex flex-col items-center gap-1.5 w-24">
+                <div class="relative">
+                  <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
+                </div>
+                <span class="text-xs font-bold text-amber-300 text-center truncate max-w-full">${m.meuCampeao}</span>
               </div>
-              <span class="text-xs font-extrabold text-slate-500 italic">VS</span>
-              <div class="text-center">
-                <p class="text-xs text-slate-400">Inimigo</p>
-                <p class="text-sm font-bold text-rose-300">${m.oponente}</p>
+
+              <div class="flex flex-col items-center">
+                <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
+              </div>
+
+              <div class="flex flex-col items-center gap-1.5 w-24">
+                <div class="relative">
+                  <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
+                </div>
+                <span class="text-xs font-bold text-rose-300 text-center truncate max-w-full">${m.oponente}</span>
               </div>
             </div>
 
+            <!-- DICAS TÁTICAS -->
             <div class="space-y-3 text-xs">
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
                   <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i> Gestão de Onda
                 </p>
-                <p class="text-slate-300 bg-slate-900/60 p-2 rounded border border-slate-800/80">${m.onda || 'Não informado.'}</p>
+                <p class="text-slate-300 bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
               </div>
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
                   <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i> Nível 1 ao 3
                 </p>
-                <p class="text-slate-300 bg-slate-900/60 p-2 rounded border border-slate-800/80">${m.early || 'Não informado.'}</p>
+                <p class="text-slate-300 bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
               </div>
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
                   <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra de Ouro
                 </p>
-                <p class="text-amber-200/90 bg-amber-950/20 p-2 rounded border border-amber-900/40">${m.regra || 'Não informado.'}</p>
+                <p class="text-amber-200/90 bg-amber-950/20 p-2.5 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
               </div>
             </div>
           </div>
@@ -262,14 +346,14 @@
       lucide.createIcons();
     }
 
-    function filtrarRota(rota) {
+    function filtrarRota(rota, elemento) {
       rotaAtiva = rota;
       document.querySelectorAll('.btn-rota').forEach(btn => {
         btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
         btn.classList.add('bg-slate-800', 'text-slate-400');
       });
-      event.target.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
-      event.target.classList.remove('bg-slate-800', 'text-slate-400');
+      elemento.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
+      elemento.classList.remove('bg-slate-800', 'text-slate-400');
       renderizarMatchups();
     }
 
@@ -333,7 +417,39 @@
       }
     }
 
-    // Inicialização ao carregar a página
+    // EXPORTAR DADOS (BAIXAR ARQUIVO JSON)
+    function exportarDados() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchups, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `grimorio_lol_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // IMPORTAR DADOS (RESTAURAR ARQUIVO JSON)
+    function importarDados(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const importados = JSON.parse(evt.target.result);
+          if (Array.isArray(importados)) {
+            matchups = importados;
+            salvarNoLocalStorage();
+            renderizarMatchups();
+            alert('Matchups importados com sucesso!');
+          }
+        } catch (err) {
+          alert('Erro ao carregar o arquivo. Verifique se é um arquivo JSON válido.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Inicialização da renderização
     renderizarMatchups();
   </script>
 </body>
