@@ -452,10 +452,28 @@
     function atualizarListaMeusCampeoes() {
       const datalist = document.getElementById('listaMeusChamps');
       const campeoesUnicos = [...new Set(matchups.map(m => m.meuCampeao))].sort();
-      datalist.innerHTML = campeoesUnicos.map(champ => `<option value="${champ}"></option>`).join(''); }  function aoDigitarMeuCampeao(valor) { champFiltroAtivo = valor.trim(); renderizarMatchups(); }  function limparFiltroChamp() { champFiltroAtivo = ''; document.getElementById('campoMeuChamp').value = ''; renderizarMatchups(); }  function partilharLink(id) { const m = matchups.find(item => item.id === id); if (!m) return; const urlBase = window.location.origin + window.location.pathname; const urlPartilha = `${urlBase}?meu=${encodeURIComponent(m.meuCampeao)}&vs=${encodeURIComponent(m.oponente)}`;
+      datalist.innerHTML = campeoesUnicos.map(champ => `<option value="${champ}"></option>`).join('');
+    }
+
+    function aoDigitarMeuCampeao(valor) {
+      champFiltroAtivo = valor.trim();
+      renderizarMatchups();
+    }
+
+    function limparFiltroChamp() {
+      champFiltroAtivo = '';
+      document.getElementById('campoMeuChamp').value = '';
+      renderizarMatchups();
+    }
+
+    function partilharLink(id) {
+      const m = matchups.find(item => item.id === id);
+      if (!m) return;
+      const urlBase = window.location.origin + window.location.pathname;
+      const urlPartilha = `${urlBase}?meu=${encodeURIComponent(m.meuCampeao)}&vs=${encodeURIComponent(m.oponente)}`;
       
       navigator.clipboard.writeText(urlPartilha).then(() => {
-        alert(`Link direto para ${m.meuCampeao} vs${m.oponente} copiado!\nPode enviar no Discord ou WhatsApp.`);
+        alert(`Link direto para ${m.meuCampeao} vs ${m.oponente} copiado!\nPode enviar no Discord ou WhatsApp.`);
       });
     }
 
@@ -537,4 +555,196 @@ Regra: ${m.regra || 'N/A'}`;
           <div>
             <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-3">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-7
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${m.rota}</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="partilharLink('${m.id}')" title="Copiar Link Direto" class="p-1 text-slate-400 hover:text-amber-300 transition"><i data-lucide="share-2" class="w-4 h-4"></i></button>
+                <button onclick="copiarDicas('${m.id}')" title="Copiar Dicas de Texto" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                <button onclick="excluirMatchup('${m.id}')" title="Eliminar" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              </div>
+            </div>
+
+            <!-- VS BANNER COM FOTOS -->
+            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-3">
+              <div class="flex flex-col items-center gap-1 w-24">
+                <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
+                <span class="text-xs font-bold text-amber-300 text-center truncate max-w-full">${m.meuCampeao}</span>
+              </div>
+
+              <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
+
+              <div class="flex flex-col items-center gap-1 w-24">
+                <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
+                <span class="text-xs font-bold text-rose-300 text-center truncate max-w-full">${m.oponente}</span>
+              </div>
+            </div>
+
+            <!-- ITENS E FEITIÇOS -->
+            <div class="flex items-center justify-between px-3 py-2 bg-slate-900/40 rounded-lg border border-hexborder/40 mb-3 text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
+                <img src="${getSpellUrl(s1)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 1">
+                <img src="${getSpellUrl(s2)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 2">
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
+                <img src="${getItemUrl(itemId)}" class="w-5 h-5 rounded border border-cyan-500/40" title="${nomesItens[itemId] || 'Item'}">
+                <span class="text-[11px] text-slate-300 font-medium">${nomesItens[itemId] || 'Item'}</span>
+              </div>
+            </div>
+
+            <!-- DICAS TÁTICAS -->
+            <div class="space-y-2.5 text-xs">
+              <div>
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i> Gestão de Onda
+                </p>
+                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
+              </div>
+              <div>
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i> Nível 1 ao 3
+                </p>
+                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
+              </div>
+              <div>
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra Fundamental
+                </p>
+                <p class="text-amber-200/90 bg-amber-950/20 p-2 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    function filtrarRota(rota, elemento) {
+      rotaAtiva = rota;
+      document.querySelectorAll('.btn-rota').forEach(btn => {
+        btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
+        btn.classList.add('bg-slate-800', 'text-slate-400');
+      });
+      elemento.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
+      elemento.classList.remove('bg-slate-800', 'text-slate-400');
+      renderizarMatchups();
+    }
+
+    function filtrarDificuldade(dif, elemento) {
+      difAtiva = dif;
+      document.querySelectorAll('.btn-dif').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-800', 'text-slate-300');
+        btn.classList.add('bg-slate-800/60');
+      });
+      elemento.classList.add('active', 'bg-slate-800', 'text-slate-300');
+      renderizarMatchups();
+    }
+
+    function abrirModalNovo() {
+      document.getElementById('formMatchup').reset();
+      document.getElementById('matchupId').value = '';
+      document.getElementById('tituloModal').innerText = 'Adicionar Novo Confronto';
+      document.getElementById('modalForm').classList.remove('hidden');
+    }
+
+    function fecharModal() {
+      document.getElementById('modalForm').classList.add('hidden');
+    }
+
+    function editarMatchup(id) {
+      const m = matchups.find(item => item.id === id);
+      if (!m) return;
+      document.getElementById('matchupId').value = m.id;
+      document.getElementById('meuCampeao').value = m.meuCampeao;
+      document.getElementById('oponente').value = m.oponente;
+      document.getElementById('rota').value = m.rota;
+      document.getElementById('dificuldade').value = m.dificuldade;
+      document.getElementById('spell1').value = m.spell1 || 'SummonerFlash';
+      document.getElementById('spell2').value = m.spell2 || 'SummonerTeleport';
+      document.getElementById('itemInicial').value = m.itemInicial || '1055';
+      document.getElementById('onda').value = m.onda || '';
+      document.getElementById('early').value = m.early || '';
+      document.getElementById('regra').value = m.regra || '';
+      
+      document.getElementById('tituloModal').innerText = 'Editar Confronto';
+      document.getElementById('modalForm').classList.remove('hidden');
+    }
+
+    function salvarMatchup(e) {
+      e.preventDefault();
+      const id = document.getElementById('matchupId').value;
+      const novo = {
+        id: id || Date.now().toString(),
+        meuCampeao: document.getElementById('meuCampeao').value.trim(),
+        oponente: document.getElementById('oponente').value.trim(),
+        rota: document.getElementById('rota').value,
+        dificuldade: document.getElementById('dificuldade').value,
+        spell1: document.getElementById('spell1').value,
+        spell2: document.getElementById('spell2').value,
+        itemInicial: document.getElementById('itemInicial').value,
+        onda: document.getElementById('onda').value.trim(),
+        early: document.getElementById('early').value.trim(),
+        regra: document.getElementById('regra').value.trim()
+      };
+
+      if (id) {
+        matchups = matchups.map(m => m.id === id ? novo : m);
+      } else {
+        matchups.unshift(novo);
+      }
+
+      salvarNoLocalStorage();
+      fecharModal();
+      renderizarMatchups();
+    }
+
+    function excluirMatchup(id) {
+      if (confirm('Tem a certeza de que pretende eliminar este confronto?')) {
+        matchups = matchups.filter(m => m.id !== id);
+        salvarNoLocalStorage();
+        renderizarMatchups();
+      }
+    }
+
+    function exportarDados() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchups, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `grimorio_lol_backup_${new Date().toISOString().slice(0,10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importarDados(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const importados = JSON.parse(evt.target.result);
+          if (Array.isArray(importados)) {
+            matchups = importados;
+            salvarNoLocalStorage();
+            renderizarMatchups();
+            alert('Confrontos importados com sucesso!');
+          }
+        } catch (err) {
+          alert('Erro ao carregar o ficheiro JSON.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // INICIALIZAÇÃO
+    atualizarListaMeusCampeoes();
+    verificarParametrosUrl();
+    renderizarMatchups();
+  </script>
+</body>
+</html>
