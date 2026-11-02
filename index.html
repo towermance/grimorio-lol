@@ -90,7 +90,7 @@
         <div class="md:col-span-3 bg-[#0a0e17]/90 border border-rose-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
           <div class="flex-1 text-right">
             <label class="block text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1">Contra oponente:</label>
-            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Darius, Akali..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
+            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Mordekaiser, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
           </div>
           <img id="avatarOpo" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20 flex-shrink-0">
         </div>
@@ -329,38 +329,40 @@
       return JSON.parse(limpo);
     }
 
-    // RESOLVE OS MODELOS DISPONÍVEIS E APLICA REGRAS RÍGIDAS DE JOGO
+    // RESOLVE OS MODELOS COM PRIORIDADE NOS MODELOS 70B (ALTA PRECISÃO DE META)
     async function dispararRequisicaoGroq(chave, meu, opo, rota) {
       const feitiçosPermitidos = rota === 'JUNGLE' 
         ? '"SummonerFlash" | "SummonerSmite" | "SummonerDot" | "SummonerHaste"'
         : '"SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal" (NUNCA SummonerSmite fora da selva!)';
 
-      const systemPrompt = `Você é um Treinador Challenger de League of Legends. Analise a match e gere um JSON puro (sem markdown, sem introduções).
-Regras Obrigatórias:
-1. Rota analisada: ${rota}.
-2. Se a rota NÃO for JUNGLE, NUNCA use SummonerSmite. Feitiços válidos para esta rota: ${feitiçosPermitidos}.
-3. itemInicial deve ser estritamente um código numérico de item de começo de jogo: "1055" (Lâmina Doran), "1054" (Escudo Doran), "1056" (Anel Doran), "2033" (Poção Corrupta), "1036" (Espada Longa), "1082" (Lacre) ou "1039" (Apenas para Jungle).
-4. itemPrioritario deve ser o NOME REAL COMPLETO do primeiro grande item lendário fechado (ex: "Dente de Na'Shor", "Criafendas", "Cutelo Negro", "Espada do Rei Destruído"). Não use códigos numéricos aqui.
-5. Não cite códigos de IDs (ex: "1056", "1039") dentro dos textos de onda, early ou regra. Use linguagem tática clara de League of Legends.
+      const systemPrompt = `Você é um Treinador Challenger e Grão-Mestre de League of Legends. Analise a matchup competitiva real e gere estritamente um JSON válido.
 
-Estrutura JSON esperada:
+DIRETRIZES TÁTICAS FUNDAMENTAIS:
+1. ROTA: ${rota}. Feitiços válidos para esta rota: ${feitiçosPermitidos}.
+2. RUNA CHAVE REALISTA: NUNCA sugira Conquistador para campeões de ataque à distância e poke rápido como Teemo, Quinn ou Kennen contra colossos (Mordekaiser, Darius, Sett). Para campeões à distância que caitam, use runas coerentes do meta: "Agilidade nos Pés", "Aery", "Cometa Arcano" ou "Aperto dos Mortos-Vivos".
+3. VERACIDADE MECÂNICA: Seja fiel às habilidades do LoL. Cogumelo de Teemo NÃO cancela puxão nem ult de Mordekaiser. Q de Teemo cega ataques básicos, não feitiços. Seja preciso.
+4. ITEM INICIAL: use apenas o ID ("1054" Doran Shield, "1055" Doran Blade, "1056" Doran Ring, "2033" Corrupting Potion, "1036" Long Sword, "1082" Dark Seal).
+5. 1º ITEM CRÍTICO: Nome por extenso do primeiro lendário fechado (ex: "Dente de Na'Shor", "Criafendas", "Cutelo Negro", "Espada do Rei Destruído", "Ampulheta de Zhonya").
+6. Não inclua números ou códigos de ID no meio das frases explicativas de onda, early ou regra.
+
+ESTRUTURA JSON:
 {
   "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
   "spell1": "SummonerFlash",
-  "spell2": "SummonerTeleport" | "SummonerDot" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "spell2": "SummonerTeleport" | "SummonerDot" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust",
   "itemInicial": "1054" | "1055" | "1056" | "2033" | "1036" | "1082",
-  "runaPrincipal": "Nome da Runa Chave (ex: Ritmo Fatal, Conquistador, Eletrocutar, Agilidade nos Pés) + motivo curto",
-  "itemPrioritario": "Nome completo do 1º item fechado",
-  "powerSpike": "Momento exato de pico de poder (ex: Nível 2, Nível 6, 1º Item)",
+  "runaPrincipal": "Nome da Runa ideal (ex: Agilidade nos Pés, Aery, Conquistador, Eletrocutar) + motivo curto",
+  "itemPrioritario": "Nome completo do 1º grande item lendário",
+  "powerSpike": "Janela exata de poder (ex: Nível 2, Nível 6, 1º Item Fechado)",
   "lutasObjetivos": "Postura nas lutas de dragão/barão e split push",
-  "onda": "Gestão de tropas ideal (slow push, freeze, bater para puxar)",
-  "early": "Como se comportar nas trocas nos níveis 1 ao 3",
-  "regra": "Habilidade essencial a desviar ou gatilho de vitória"
+  "onda": "Instrução tática de controle de onda (slow push, freeze, puxar)",
+  "early": "Como trocar nos níveis 1 ao 3 com base no alcance e cooldowns",
+  "regra": "Habilidade crítica real para desviar ou segredo exato do duelo"
 }`;
 
-      const userPrompt = `Duelo: ${meu} contra ${opo} na rota ${rota}. Retorne o plano tático em JSON.`;
+      const userPrompt = `Confronto: ${meu} contra ${opo} na rota ${rota}. Retorne o plano tático em JSON puro.`;
 
-      let modelosCandidatos = [];
+      let modelosDisponiveis = [];
 
       try {
         const resModels = await fetch('https://api.groq.com/openai/v1/models', {
@@ -368,19 +370,24 @@ Estrutura JSON esperada:
         });
         const dataModels = await resModels.json();
         if (dataModels.data && Array.isArray(dataModels.data)) {
-          modelosCandidatos = dataModels.data
+          modelosDisponiveis = dataModels.data
             .map(m => m.id)
             .filter(id => !id.includes('whisper') && !id.includes('guard'));
         }
       } catch (e) {}
 
-      if (modelosCandidatos.length === 0) {
-        throw new Error('Não foi possível obter os modelos ativos na sua conta Groq. Verifique a chave.');
+      // Ordena colocando modelos 70B (muito mais inteligentes) na frente dos 8B
+      const modelos70b = modelosDisponiveis.filter(m => m.includes('70b'));
+      const outrosModelos = modelosDisponiveis.filter(m => !m.includes('70b'));
+      const listaFinalModelos = [...modelos70b, ...outrosModelos];
+
+      if (listaFinalModelos.length === 0) {
+        listaFinalModelos.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant');
       }
 
       let ultimoErro = '';
 
-      for (const modelo of modelosCandidatos) {
+      for (const modelo of listaFinalModelos) {
         try {
           const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -395,7 +402,7 @@ Estrutura JSON esperada:
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: 'json_object' },
-              temperature: 0.2
+              temperature: 0.15
             })
           });
 
@@ -448,7 +455,6 @@ Estrutura JSON esperada:
         const respostaTexto = await dispararRequisicaoGroq(chave, meu, opo, rota);
         const analise = extrairJsonPuro(respostaTexto);
 
-        // Sanidade preventiva caso o modelo tente inventar Smite fora da selva
         let sp1 = analise.spell1 || 'SummonerFlash';
         let sp2 = analise.spell2 || 'SummonerTeleport';
         if (rota !== 'JUNGLE') {
