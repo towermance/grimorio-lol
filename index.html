@@ -70,7 +70,7 @@
           <img id="avatarMeu" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20 flex-shrink-0">
           <div class="flex-1">
             <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Você joga de:</label>
-            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Teemo, Aatrox..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
+            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Garen, Sett, Ahri..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
           </div>
         </div>
 
@@ -90,7 +90,7 @@
         <div class="md:col-span-3 bg-[#0a0e17]/90 border border-rose-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
           <div class="flex-1 text-right">
             <label class="block text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1">Contra oponente:</label>
-            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Mordekaiser, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
+            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Teemo, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
           </div>
           <img id="avatarOpo" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20 flex-shrink-0">
         </div>
@@ -329,38 +329,38 @@
       return JSON.parse(limpo);
     }
 
-    // RESOLVE OS MODELOS COM PRIORIDADE NOS MODELOS 70B (ALTA PRECISÃO DE META)
+    // RESOLVE OS MODELOS COM REGRAS ESTRITAS DE AD/AP E METAGAME REAL
     async function dispararRequisicaoGroq(chave, meu, opo, rota) {
       const feitiçosPermitidos = rota === 'JUNGLE' 
         ? '"SummonerFlash" | "SummonerSmite" | "SummonerDot" | "SummonerHaste"'
         : '"SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal" (NUNCA SummonerSmite fora da selva!)';
 
-      const systemPrompt = `Você é um Treinador Challenger e Grão-Mestre de League of Legends. Analise a matchup competitiva real e gere estritamente um JSON válido.
+      const systemPrompt = `Você é um Analista Challenger de League of Legends. Analise o confronto e devolva ESTRITAMENTE um objeto JSON puro.
 
-DIRETRIZES TÁTICAS FUNDAMENTAIS:
-1. ROTA: ${rota}. Feitiços válidos para esta rota: ${feitiçosPermitidos}.
-2. RUNA CHAVE REALISTA: NUNCA sugira Conquistador para campeões de ataque à distância e poke rápido como Teemo, Quinn ou Kennen contra colossos (Mordekaiser, Darius, Sett). Para campeões à distância que caitam, use runas coerentes do meta: "Agilidade nos Pés", "Aery", "Cometa Arcano" ou "Aperto dos Mortos-Vivos".
-3. VERACIDADE MECÂNICA: Seja fiel às habilidades do LoL. Cogumelo de Teemo NÃO cancela puxão nem ult de Mordekaiser. Q de Teemo cega ataques básicos, não feitiços. Seja preciso.
-4. ITEM INICIAL: use apenas o ID ("1054" Doran Shield, "1055" Doran Blade, "1056" Doran Ring, "2033" Corrupting Potion, "1036" Long Sword, "1082" Dark Seal).
-5. 1º ITEM CRÍTICO: Nome por extenso do primeiro lendário fechado (ex: "Dente de Na'Shor", "Criafendas", "Cutelo Negro", "Espada do Rei Destruído", "Ampulheta de Zhonya").
-6. Não inclua números ou códigos de ID no meio das frases explicativas de onda, early ou regra.
+REGRAS RÍGIDAS DE BUILD E MECÂNICA:
+1. ROTA E FEITIÇOS: Rota ${rota}. Feitiços: ${feitiçosPermitidos}. NUNCA use Smite em lane.
+2. PERFIL DE DANO (AD vs AP):
+   - Se o campeão do jogador for primariamente de Dano Físico (AD) como Garen, Darius, Sett, Aatrox, Riven, Fiora, Renekton: o 1º item crítico DEVE ser um item de lutador/colosso físico (exemplo: Quebrapassos, Força da Trindade, Cutelo Negro, Hidra Raivosa, Espada do Rei Destruído, Hemodrenário). É ESTRITAMENTE PROIBIDO sugerir itens de Poder de Habilidade (AP) como Dente de Na'Shor, Criafendas, Ampulheta de Zhonya ou Rabadon para campeões AD sem escalamento AP!
+   - Se o campeão for AP (ex: Teemo, Mordekaiser, Gwen, Rumble), aí sim sugira itens com AP coerentes.
+3. ITEM INICIAL: use estritamente o ID ("1054" Doran Shield, "1055" Doran Blade, "1056" Doran Ring, "2033" Corrupting Potion, "1036" Long Sword, "1082" Dark Seal).
+4. MECÂNICAS REAIS: Não invente propriedades inexistentes (ex: cogumelo do Teemo é apenas a ultimate R no nível 6 e dá dano mágico, nunca dano verdadeiro; o Q do Teemo é dardo cegante e não cogumelo).
 
-ESTRUTURA JSON:
+ESTRUTURA JSON EXATA:
 {
   "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
   "spell1": "SummonerFlash",
   "spell2": "SummonerTeleport" | "SummonerDot" | "SummonerHaste" | "SummonerBarrier" | "SummonerExhaust",
   "itemInicial": "1054" | "1055" | "1056" | "2033" | "1036" | "1082",
-  "runaPrincipal": "Nome da Runa ideal (ex: Agilidade nos Pés, Aery, Conquistador, Eletrocutar) + motivo curto",
-  "itemPrioritario": "Nome completo do 1º grande item lendário",
-  "powerSpike": "Janela exata de poder (ex: Nível 2, Nível 6, 1º Item Fechado)",
+  "runaPrincipal": "Nome da Runa viável no meta + justificativa de 5 palavras",
+  "itemPrioritario": "Nome real do 1º item lendário compatível com o tipo de dano do campeão",
+  "powerSpike": "Momento em que o jogador ganha vantagem (ex: Nível 2, Nível 6, 1º Item)",
   "lutasObjetivos": "Postura nas lutas de dragão/barão e split push",
-  "onda": "Instrução tática de controle de onda (slow push, freeze, puxar)",
-  "early": "Como trocar nos níveis 1 ao 3 com base no alcance e cooldowns",
-  "regra": "Habilidade crítica real para desviar ou segredo exato do duelo"
+  "onda": "Gestão de onda ideal para este confronto",
+  "early": "Como trocar nos níveis 1 ao 3 respeitando alcance e habilidades reais",
+  "regra": "Habilidade real a desviar ou condição de vitória exata"
 }`;
 
-      const userPrompt = `Confronto: ${meu} contra ${opo} na rota ${rota}. Retorne o plano tático em JSON puro.`;
+      const userPrompt = `Confronto detalhado: Jogador jogando de ${meu} contra ${opo} na rota ${rota}. Retorne o plano tático em JSON puro.`;
 
       let modelosDisponiveis = [];
 
@@ -376,18 +376,18 @@ ESTRUTURA JSON:
         }
       } catch (e) {}
 
-      // Ordena colocando modelos 70B (muito mais inteligentes) na frente dos 8B
+      // Prioriza modelos de alta capacidade (70b)
       const modelos70b = modelosDisponiveis.filter(m => m.includes('70b'));
-      const outrosModelos = modelosDisponiveis.filter(m => !m.includes('70b'));
-      const listaFinalModelos = [...modelos70b, ...outrosModelos];
+      const outros = modelosDisponiveis.filter(m => !m.includes('70b'));
+      const listaFinal = [...modelos70b, ...outros];
 
-      if (listaFinalModelos.length === 0) {
-        listaFinalModelos.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant');
+      if (listaFinal.length === 0) {
+        listaFinal.push('llama-3.3-70b-versatile', 'llama-3.1-8b-instant');
       }
 
       let ultimoErro = '';
 
-      for (const modelo of listaFinalModelos) {
+      for (const modelo of listaFinal) {
         try {
           const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -402,7 +402,7 @@ ESTRUTURA JSON:
                 { role: 'user', content: userPrompt }
               ],
               response_format: { type: 'json_object' },
-              temperature: 0.15
+              temperature: 0.1
             })
           });
 
