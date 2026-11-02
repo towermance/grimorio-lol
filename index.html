@@ -25,7 +25,7 @@
 </head>
 <body class="bg-hexbg text-slate-100 min-h-screen font-sans selection:bg-amber-500/30 selection:text-amber-200">
 
-  <!-- TOPO / CABEÇALHO -->
+  <!-- CABEÇALHO -->
   <header class="border-b border-hexborder bg-[#0f172a]/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -39,8 +39,7 @@
       </div>
       
       <div class="flex items-center gap-2">
-        <!-- BOTÕES DE BACKUP -->
-        <button onclick="exportarDados()" title="Baixar Backup" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
+        <button onclick="exportarDados()" title="Transferir Backup (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="download" class="w-4 h-4"></i>
         </button>
         <label title="Restaurar Backup" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
@@ -48,42 +47,54 @@
           <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
         </label>
 
-        <!-- NOVO MATCHUP -->
         <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Novo</span> Matchup
+          <span class="hidden sm:inline">Novo</span> Confronto
         </button>
       </div>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- BARRA DE PESQUISA & FILTRO DE ROTA -->
-    <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col md:flex-row gap-4 items-center justify-between">
-      <div class="relative w-full md:w-96">
-        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-        <input type="text" id="campoBusca" oninput="renderizarMatchups()" placeholder="Buscar campeão ou oponente..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-hexgold transition">
+    <!-- BARRA DE PESQUISA E FILTROS -->
+    <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div class="relative w-full md:w-96">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+          <input type="text" id="campoBusca" oninput="renderizarMatchups()" placeholder="Pesquisar campeão ou oponente..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-hexgold transition">
+        </div>
+
+        <!-- FILTROS DE ROTA -->
+        <div class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1">
+          <button onclick="filtrarRota('ALL', this)" class="btn-rota active px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Todas as Rotas</button>
+          <button onclick="filtrarRota('TOP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Top</button>
+          <button onclick="filtrarRota('JUNGLE', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Jungle</button>
+          <button onclick="filtrarRota('MID', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Mid</button>
+          <button onclick="filtrarRota('ADC', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">ADC</button>
+          <button onclick="filtrarRota('SUP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Suporte</button>
+        </div>
       </div>
-      <div class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1 scrollbar-none">
-        <button onclick="filtrarRota('ALL', this)" class="btn-rota active px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Todos</button>
-        <button onclick="filtrarRota('TOP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Top</button>
-        <button onclick="filtrarRota('JUNGLE', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Jungle</button>
-        <button onclick="filtrarRota('MID', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Mid</button>
-        <button onclick="filtrarRota('ADC', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">ADC</button>
-        <button onclick="filtrarRota('SUP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Suporte</button>
+
+      <!-- FILTRO DE DIFICULDADE RÁPIDO -->
+      <div class="flex items-center gap-2 pt-2 border-t border-hexborder/60 text-xs">
+        <span class="text-slate-400 font-semibold flex items-center gap-1"><i data-lucide="filter" class="w-3.5 h-3.5 text-amber-400"></i> Dificuldade:</span>
+        <div class="flex gap-1.5 flex-wrap">
+          <button onclick="filtrarDificuldade('ALL', this)" class="btn-dif active px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium">Todas</button>
+          <button onclick="filtrarDificuldade('Fácil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-emerald-400 hover:bg-slate-800 font-medium">Fácil</button>
+          <button onclick="filtrarDificuldade('Média', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-amber-400 hover:bg-slate-800 font-medium">Média</button>
+          <button onclick="filtrarDificuldade('Difícil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-orange-400 hover:bg-slate-800 font-medium">Difícil</button>
+          <button onclick="filtrarDificuldade('Muito Difícil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-rose-400 hover:bg-slate-800 font-medium">Muito Difícil</button>
+        </div>
       </div>
     </div>
 
-    <!-- GRADE DE CARDS -->
-    <div id="gradeMatchups" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <!-- Inserido dinamicamente -->
-    </div>
+    <!-- GRADE DE CONFRONTOS -->
+    <div id="gradeMatchups" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </main>
 
-  <!-- LISTA DE SUGESTÕES DE CAMPEÕES (DATA LIST) -->
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL / FORMULÁRIO DE NOVO OU EDIÇÃO DE CONFRONTO -->
+  <!-- MODAL / FORMULÁRIO -->
   <div id="modalForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border border-hexborder w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
@@ -96,7 +107,7 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Seu Campeão</label>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">O Seu Campeão</label>
             <input type="text" id="meuCampeao" list="listaCampeoes" required placeholder="Ex: Renekton" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
           </div>
           <div>
@@ -107,7 +118,7 @@
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Rota (Lane)</label>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Rota</label>
             <select id="rota" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
               <option value="TOP">Top</option>
               <option value="JUNGLE">Jungle</option>
@@ -127,41 +138,80 @@
           </div>
         </div>
 
+        <!-- SELEÇÃO DE FEITIÇOS E ITENS -->
+        <div class="grid grid-cols-2 gap-4 bg-[#0a0e17]/60 p-3 rounded-lg border border-hexborder/60">
+          <div>
+            <label class="block text-xs font-semibold text-amber-300 mb-1">Feitiço 1 & 2</label>
+            <div class="grid grid-cols-2 gap-1.5">
+              <select id="spell1" class="bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
+                <option value="SummonerFlash">Flash</option>
+                <option value="SummonerDot">Incendiar</option>
+                <option value="SummonerTeleport">Teleporte</option>
+                <option value="SummonerHaste">Fantasma</option>
+                <option value="SummonerSmite">Golpear</option>
+                <option value="SummonerBarrier">Barreira</option>
+                <option value="SummonerExhaust">Exaustão</option>
+                <option value="SummonerHeal">Curar</option>
+              </select>
+              <select id="spell2" class="bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
+                <option value="SummonerTeleport">Teleporte</option>
+                <option value="SummonerDot">Incendiar</option>
+                <option value="SummonerFlash">Flash</option>
+                <option value="SummonerHaste">Fantasma</option>
+                <option value="SummonerSmite">Golpear</option>
+                <option value="SummonerBarrier">Barreira</option>
+                <option value="SummonerExhaust">Exaustão</option>
+                <option value="SummonerHeal">Curar</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-cyan-300 mb-1">Item Inicial Recomendado</label>
+            <select id="itemInicial" class="w-full bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
+              <option value="1055">Lâmina de Doran</option>
+              <option value="1054">Escudo de Doran</option>
+              <option value="1056">Anel de Doran</option>
+              <option value="2033">Poção Corrupta</option>
+              <option value="3070">Lágrima da Deusa</option>
+              <option value="1036">Espada Longa</option>
+              <option value="1082">Lacre Sombrio</option>
+              <option value="1039">Cria-Caminho (Jungle)</option>
+            </select>
+          </div>
+        </div>
+
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Controle de Onda (Wave Management)</label>
-          <input type="text" id="onda" placeholder="Ex: Deixar vir no lvl 1 e congelar perto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Vaga / Onda de Tropas</label>
+          <input type="text" id="onda" placeholder="Ex: Deixar vir no nível 1 e congelar junto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
         </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 mb-1">Nível 1 ao 3 (Trocas Iniciais)</label>
-          <textarea id="early" rows="2" placeholder="Ex: Evite trocar no nível 1. Espere o nível 3 com fúria pronta..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
+          <textarea id="early" rows="2" placeholder="Ex: Evite trocar dano no nível 1. Espere pelo nível 3..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Regra de Ouro / Habilidade Chave</label>
-          <textarea id="regra" rows="2" placeholder="Ex: Guarde sempre o dash para desviar da habilidade principal dele..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Regra Fundamental / Habilidade Crítica</label>
+          <textarea id="regra" rows="2" placeholder="Ex: Guarde sempre a corrida/dash para desviar da habilidade principal dele..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="fecharModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Salvar Confronto</button>
+          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Guardar Confronto</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // VERSÃO E LISTA DO DATA DRAGON RIOT
     const RIOT_VERSION = '14.10.1';
     let listaChamps = [];
 
-    // Carrega a lista completa de campeões oficial da Riot
     async function carregarCampeoesRiot() {
       try {
         const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/data/pt_BR/champion.json`);
         const data = await res.json();
         listaChamps = Object.keys(data.data);
-        
         const datalist = document.getElementById('listaCampeoes');
         datalist.innerHTML = listaChamps.map(c => `<option value="${c}"></option>`).join('');
       } catch (err) {
@@ -170,7 +220,6 @@
     }
     carregarCampeoesRiot();
 
-    // Normaliza o nome do campeão para bater com o formato da Riot (ex: "Dr. Mundo" -> "DrMundo", "Cho'Gath" -> "Chogath")
     function tratarNomeRiot(nome) {
       if (!nome) return '';
       const limpo = nome.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -191,12 +240,8 @@
         'ksante': 'KSante'
       };
       if (mapaEspecial[limpo]) return mapaEspecial[limpo];
-
-      // Tenta achar na lista da Riot sem case-sensitive
       const encontrado = listaChamps.find(c => c.toLowerCase() === limpo);
       if (encontrado) return encontrado;
-
-      // Capitaliza a primeira letra como fallback
       return nome.trim().charAt(0).toUpperCase() + nome.trim().slice(1).replace(/\s+/g, '');
     }
 
@@ -205,7 +250,26 @@
       return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/champion/${idRiot}.png`;
     }
 
-    // DADOS INICIAIS
+    function getSpellUrl(spellKey) {
+      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/spell/${spellKey}.png`;
+    }
+
+    function getItemUrl(itemId) {
+      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/item/${itemId}.png`;
+    }
+
+    const nomesItens = {
+      '1055': 'Lâmina de Doran',
+      '1054': 'Escudo de Doran',
+      '1056': 'Anel de Doran',
+      '2033': 'Poção Corrupta',
+      '3070': 'Lágrima da Deusa',
+      '1036': 'Espada Longa',
+      '1082': 'Lacre Sombrio',
+      '1039': 'Cria-Caminho'
+    };
+
+    // BASE DE DADOS EXPANDIDA COM OS CONFRONTOS MAIS POPULARES DO META
     const dadosIniciais = [
       {
         id: "1",
@@ -213,37 +277,151 @@
         oponente: "Aatrox",
         rota: "TOP",
         dificuldade: "Média",
+        spell1: "SummonerFlash",
+        spell2: "SummonerDot",
+        itemInicial: "1055",
         onda: "Deixe a onda vir no nível 1 e congele perto da sua torre.",
         early: "Evite o Q1 e Q2 dele. No nível 3, entre com E, comba com W fortalecido e volte com E2 antes do Q3 dele cair.",
         regra: "Comprar bota de armadura ou corta-cura no primeiro retorno anula o sustento dele."
       },
       {
         id: "2",
-        meuCampeao: "Ahri",
-        oponente: "Zed",
-        rota: "MID",
-        dificuldade: "Difícil",
-        onda: "Pressione no nível 1-2. Do nível 3 em diante, mantenha a onda equilibrada.",
-        early: "Puna quando ele usar a sombra (W) para farmar. Sem sombra, ele não tem escape nem dano por 20 segundos.",
-        regra: "Se ele ultar em você, jogue o Charme (E) imediatamente para trás do seu próprio campeão."
-      },
-      {
-        id: "3",
         meuCampeao: "Darius",
         oponente: "Garen",
         rota: "TOP",
         dificuldade: "Fácil",
-        onda: "Mantenha a onda no meio ou lenta empurrando. Ele não pode se aproximar das tropas.",
+        spell1: "SummonerFlash",
+        spell2: "SummonerHaste",
+        itemInicial: "1055",
+        onda: "Mantenha a onda lenta empurrando. Garen não pode encostar nos minions sem apanhar.",
         early: "Quando ele vier dar o Q com velocidade, acerte o W para desacelerar e guarde seu puxão (E) para a fuga dele.",
-        regra: "Nunca force luta sem puxão disponível perto da torre inimiga."
+        regra: "Nunca gaste o puxão (E) à toa antes dele gastar a corrida."
+      },
+      {
+        id: "3",
+        meuCampeao: "Jax",
+        oponente: "Camille",
+        rota: "TOP",
+        dificuldade: "Fácil",
+        spell1: "SummonerFlash",
+        spell2: "SummonerTeleport",
+        itemInicial: "1055",
+        onda: "Deixe a onda estável no meio até o nível 3.",
+        early: "Guarde o Contra-Ataque (E) para o segundo golpe do Q dela (dano verdadeiro).",
+        regra: "Quando ela pular na parede com o E, ative o seu E imediatamente para negar o atordoamento."
+      },
+      {
+        id: "4",
+        meuCampeao: "Fiora",
+        oponente: "Mordekaiser",
+        rota: "TOP",
+        dificuldade: "Média",
+        spell1: "SummonerFlash",
+        spell2: "SummonerDot",
+        itemInicial: "1055",
+        onda: "Evite ficar preso debaixo da torre dele. Manter a onda congelada no seu lado é o cenário perfeito.",
+        early: "Dance em volta dos vitais com o Q. Use o Ripostar (W) para bloquear o puxão (E) dele.",
+        regra: "Se reagir rápido, o W da Fiora pode bloquear a Ultimate do Mordekaiser enquanto ele ergue a maça."
+      },
+      {
+        id: "5",
+        meuCampeao: "Ahri",
+        oponente: "Zed",
+        rota: "MID",
+        dificuldade: "Difícil",
+        spell1: "SummonerFlash",
+        spell2: "SummonerTeleport",
+        itemInicial: "1056",
+        onda: "Pressione no nível 1-2. Do nível 3 em diante, mantenha a onda equilibrada.",
+        early: "Puna quando ele usar a sombra (W) para farmar. Sem sombra, ele fica 20 segundos vulnerável a ganks.",
+        regra: "Se ele ultar em você, jogue o Charme (E) imediatamente para trás do seu próprio campeão onde ele vai surgir."
+      },
+      {
+        id: "6",
+        meuCampeao: "Yasuo",
+        oponente: "Syndra",
+        rota: "MID",
+        dificuldade: "Média",
+        spell1: "SummonerFlash",
+        spell2: "SummonerDot",
+        itemInicial: "1055",
+        onda: "Deixe empurrar em você até o nível 2. Não tome poke de graça no nível 1.",
+        early: "Use a parede de vento (W) para bloquear a dispersão das esferas (E) ou a Ultimate completa dela.",
+        regra: "Sem a Parede de Vento, não vá para cima se ela tiver as esferas prontas."
+      },
+      {
+        id: "7",
+        meuCampeao: "Sylas",
+        oponente: "Malphite",
+        rota: "MID",
+        dificuldade: "Muito Fácil",
+        spell1: "SummonerFlash",
+        spell2: "SummonerTeleport",
+        itemInicial: "1056",
+        onda: "Puxe as primeiras ondas para garantir nível 2 e 3 rápido.",
+        early: "Você ganha todas as trocas curtas com W. O dano mágico do Sylas ignora o acúmulo de armadura do Malphite.",
+        regra: "Roube a ultimate dele no nível 6 e use para rodar pelo mapa (roam) nas rotas laterais."
+      },
+      {
+        id: "8",
+        meuCampeao: "Lee Sin",
+        oponente: "Master Yi",
+        rota: "JUNGLE",
+        dificuldade: "Fácil",
+        spell1: "SummonerFlash",
+        spell2: "SummonerSmite",
+        itemInicial: "1039",
+        onda: "Invada a selva dele no nível 3 se ele começar no lado oposto.",
+        early: "O Yi precisa farmar até o nível 6. Aplique pressão máxima nas rotas antes que ele compre o primeiro item.",
+        regra: "No 1v1, guarde seu Chute (R) para cancelar o W (meditação) do Yi e corte a cura dele."
+      },
+      {
+        id: "9",
+        meuCampeao: "Jinx",
+        oponente: "Draven",
+        rota: "ADC",
+        dificuldade: "Muito Difícil",
+        spell1: "SummonerFlash",
+        spell2: "SummonerHeal",
+        itemInicial: "1055",
+        onda: "Deixe ele empurrar. Nunca dispute pressão de rota no nível 1 contra os machados giratórios.",
+        early: "Farme à distância máxima com os foguetes (Q). Jogue as mordidinhas (E) exatamente onde o machado dele vai cair.",
+        regra: "Se o Draven pegar 1 abate cedo, jogue sob torre e espere a ajuda do seu caçador."
+      },
+      {
+        id: "10",
+        meuCampeao: "Thresh",
+        oponente: "Leona",
+        rota: "SUP",
+        dificuldade: "Média",
+        spell1: "SummonerFlash",
+        spell2: "SummonerDot",
+        itemInicial: "1054",
+        onda: "Ajude seu ADC a pegar nível 2 primeiro.",
+        early: "Use o Esfolar (E) para cancelar a espada zênite da Leona enquanto ela viaja pelo ar.",
+        regra: "Se você cancelar o salto da Leona com o seu E, ela fica no meio do caminho sem alcance para atordoar seu atirador."
       }
     ];
 
     let matchups = JSON.parse(localStorage.getItem('grimorio_matchups')) || dadosIniciais;
     let rotaAtiva = 'ALL';
+    let difAtiva = 'ALL';
 
     function salvarNoLocalStorage() {
       localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
+    }
+
+    function copiarDicas(id) {
+      const m = matchups.find(item => item.id === id);
+      if (!m) return;
+      const texto = `[Grimório LoL] ${m.meuCampeao} vs ${m.oponente} (${m.rota})
+Dificuldade: ${m.dificuldade}
+Onda: ${m.onda || 'N/A'}
+Início: ${m.early || 'N/A'}
+Regra: ${m.regra || 'N/A'}`;
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('Plano tático copiado com sucesso!');
+      });
     }
 
     function renderizarMatchups() {
@@ -254,16 +432,16 @@
 
       const filtrados = matchups.filter(m => {
         const correspondeRota = rotaAtiva === 'ALL' || m.rota === rotaAtiva;
+        const correspondeDif = difAtiva === 'ALL' || m.dificuldade === difAtiva;
         const correspondeBusca = m.meuCampeao.toLowerCase().includes(termo) || m.oponente.toLowerCase().includes(termo);
-        return correspondeRota && correspondeBusca;
+        return correspondeRota && correspondeDif && correspondeBusca;
       });
 
       if (filtrados.length === 0) {
         container.innerHTML = `
           <div class="col-span-full text-center py-16 text-slate-500">
             <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-            <p class="font-medium text-slate-400">Nenhum confronto encontrado.</p>
-            <p class="text-xs mt-1">Clique em "+ Novo Matchup" para cadastrar sua primeira estratégia.</p>
+            <p class="font-medium text-slate-400">Nenhum confronto localizado com os filtros selecionados.</p>
           </div>
         `;
         lucide.createIcons();
@@ -280,6 +458,9 @@
 
         const imgMeu = getAvatarUrl(m.meuCampeao);
         const imgOpo = getAvatarUrl(m.oponente);
+        const s1 = m.spell1 || 'SummonerFlash';
+        const s2 = m.spell2 || 'SummonerDot';
+        const itemId = m.itemInicial || '1055';
 
         const card = document.createElement('div');
         card.className = "bg-hexcard border border-hexborder hover:border-amber-500/40 transition duration-200 rounded-xl p-5 shadow-lg flex flex-col justify-between";
@@ -291,51 +472,60 @@
                 <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
               </div>
               <div class="flex items-center gap-1">
+                <button onclick="copiarDicas('${m.id}')" title="Copiar Dicas" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                <button onclick="excluirMatchup('${m.id}')" title="Excluir" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <button onclick="excluirMatchup('${m.id}')" title="Eliminar" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
             </div>
 
-            <!-- VS BANNER COM FOTOS OFICIAIS -->
-            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-4">
-              <div class="flex flex-col items-center gap-1.5 w-24">
-                <div class="relative">
-                  <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
-                </div>
+            <!-- VS BANNER COM FOTOS -->
+            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-3">
+              <div class="flex flex-col items-center gap-1 w-24">
+                <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
                 <span class="text-xs font-bold text-amber-300 text-center truncate max-w-full">${m.meuCampeao}</span>
               </div>
 
-              <div class="flex flex-col items-center">
-                <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
-              </div>
+              <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
 
-              <div class="flex flex-col items-center gap-1.5 w-24">
-                <div class="relative">
-                  <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
-                </div>
+              <div class="flex flex-col items-center gap-1 w-24">
+                <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
                 <span class="text-xs font-bold text-rose-300 text-center truncate max-w-full">${m.oponente}</span>
               </div>
             </div>
 
+            <!-- ITENS E FEITIÇOS -->
+            <div class="flex items-center justify-between px-3 py-2 bg-slate-900/40 rounded-lg border border-hexborder/40 mb-3 text-xs">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
+                <img src="${getSpellUrl(s1)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 1">
+                <img src="${getSpellUrl(s2)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 2">
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
+                <img src="${getItemUrl(itemId)}" class="w-5 h-5 rounded border border-cyan-500/40" title="${nomesItens[itemId] || 'Item'}">
+                <span class="text-[11px] text-slate-300 font-medium">${nomesItens[itemId] || 'Item'}</span>
+              </div>
+            </div>
+
             <!-- DICAS TÁTICAS -->
-            <div class="space-y-3 text-xs">
+            <div class="space-y-2.5 text-xs">
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
                   <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i> Gestão de Onda
                 </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
+                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
               </div>
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
                   <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i> Nível 1 ao 3
                 </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2.5 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
+                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
               </div>
               <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-1">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra de Ouro
+                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra Fundamental
                 </p>
-                <p class="text-amber-200/90 bg-amber-950/20 p-2.5 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
+                <p class="text-amber-200/90 bg-amber-950/20 p-2 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
               </div>
             </div>
           </div>
@@ -354,6 +544,16 @@
       });
       elemento.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
       elemento.classList.remove('bg-slate-800', 'text-slate-400');
+      renderizarMatchups();
+    }
+
+    function filtrarDificuldade(dif, elemento) {
+      difAtiva = dif;
+      document.querySelectorAll('.btn-dif').forEach(btn => {
+        btn.classList.remove('active', 'bg-slate-800', 'text-slate-300');
+        btn.classList.add('bg-slate-800/60');
+      });
+      elemento.classList.add('active', 'bg-slate-800', 'text-slate-300');
       renderizarMatchups();
     }
 
@@ -376,6 +576,9 @@
       document.getElementById('oponente').value = m.oponente;
       document.getElementById('rota').value = m.rota;
       document.getElementById('dificuldade').value = m.dificuldade;
+      document.getElementById('spell1').value = m.spell1 || 'SummonerFlash';
+      document.getElementById('spell2').value = m.spell2 || 'SummonerTeleport';
+      document.getElementById('itemInicial').value = m.itemInicial || '1055';
       document.getElementById('onda').value = m.onda || '';
       document.getElementById('early').value = m.early || '';
       document.getElementById('regra').value = m.regra || '';
@@ -393,6 +596,9 @@
         oponente: document.getElementById('oponente').value.trim(),
         rota: document.getElementById('rota').value,
         dificuldade: document.getElementById('dificuldade').value,
+        spell1: document.getElementById('spell1').value,
+        spell2: document.getElementById('spell2').value,
+        itemInicial: document.getElementById('itemInicial').value,
         onda: document.getElementById('onda').value.trim(),
         early: document.getElementById('early').value.trim(),
         regra: document.getElementById('regra').value.trim()
@@ -410,14 +616,13 @@
     }
 
     function excluirMatchup(id) {
-      if (confirm('Tem certeza que deseja apagar esse confronto?')) {
+      if (confirm('Tem a certeza de que pretende eliminar este confronto?')) {
         matchups = matchups.filter(m => m.id !== id);
         salvarNoLocalStorage();
         renderizarMatchups();
       }
     }
 
-    // EXPORTAR DADOS (BAIXAR ARQUIVO JSON)
     function exportarDados() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchups, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -428,7 +633,6 @@
       downloadAnchor.remove();
     }
 
-    // IMPORTAR DADOS (RESTAURAR ARQUIVO JSON)
     function importarDados(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -440,16 +644,15 @@
             matchups = importados;
             salvarNoLocalStorage();
             renderizarMatchups();
-            alert('Matchups importados com sucesso!');
+            alert('Confrontos importados com sucesso!');
           }
         } catch (err) {
-          alert('Erro ao carregar o arquivo. Verifique se é um arquivo JSON válido.');
+          alert('Erro ao carregar o ficheiro JSON.');
         }
       };
       reader.readAsText(file);
     }
 
-    // Inicialização da renderização
     renderizarMatchups();
   </script>
 </body>
