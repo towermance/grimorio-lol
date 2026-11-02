@@ -327,19 +327,30 @@
       return JSON.parse(limpo);
     }
 
-    // CHAMADA COM OS MODELOS ATIVOS RECOMENDADOS PELA GOOGLE
+    // RESOLVE O MODELO REAL DA SUA CHAVE DINAMICAMENTE
     async function dispararRequisicaoGemini(chave, prompt) {
-      const modelos = [
-        'gemini-3.8-flash',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro'
-      ];
+      let modelosValidos = [];
+
+      try {
+        const resLista = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${chave}`);
+        const dataLista = await resLista.json();
+        if (dataLista.models && Array.isArray(dataLista.models)) {
+          modelosValidos = dataLista.models
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name); // Formato: "models/nome-do-modelo"
+        }
+      } catch (e) {}
+
+      // Se a listagem não retornar, usa os nomes nativos com prefixo completo
+      if (modelosValidos.length === 0) {
+        modelosValidos = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-2.5-flash'];
+      }
 
       let ultimoErro = '';
 
-      for (const modelo of modelos) {
+      for (const modeloPath of modelosValidos) {
         try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${chave}`;
+          const url = `https://generativelanguage.googleapis.com/v1beta/${modeloPath}:generateContent?key=${chave}`;
           const res = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -413,7 +424,7 @@ Responda preenchendo obrigatoriamente este formato JSON:
 }
 Valores aceitos em dificuldade: Fácil, Média, Difícil, Muito Difícil.
 Valores aceitos em spell1 e spell2: SummonerFlash, SummonerDot, SummonerTeleport, SummonerHaste, SummonerSmite, SummonerBarrier, SummonerExhaust, SummonerHeal.
-Valores aceitos em itemInicial: 1055 (Lâmina), 1054 (Escudo), 1056 (Anel), 2033 (Poção), 1036 (Espada Longa), 1082 (Lacre), 1039 (Jungle).`;
+Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
 
       try {
         const respostaTexto = await dispararRequisicaoGemini(chave, prompt);
