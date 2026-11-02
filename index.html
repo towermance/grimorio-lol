@@ -103,11 +103,11 @@
       </div>
     </div>
 
-    <!-- RESULTADO DO PLANO TÁTICO -->
+    <!-- RESULTADO DO PLANO TÁTICO EXPANDIDO -->
     <div id="blocoResultadoIA" class="hidden mb-12 animate-fade-in">
       <div class="flex items-center justify-between mb-3">
         <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
-          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Plano Tático Gerado
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Plano Tático Detalhado
         </h3>
         <button onclick="copiarDicaAtual()" class="text-xs text-amber-300 hover:text-amber-200 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded flex items-center gap-1.5 transition">
           <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Estratégia
@@ -163,7 +163,7 @@
               <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              O sistema guarda apenas texto leve no seu navegador (alguns kilobytes). O seu dispositivo <strong>não fica lento</strong>.
+              O sistema guarda apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou dispositivo <strong>não ficam lentos</strong>.
             </p>
           </div>
         </div>
@@ -175,8 +175,8 @@
 
         <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
           <p class="font-bold text-slate-200">Como obter a chave gratuita em 1 minuto:</p>
-          <p>1. Aceda ao site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
-          <p>2. Inicie sessão com a sua conta Google.</p>
+          <p>1. Acesse o site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
+          <p>2. Inicie sessão com sua conta Google.</p>
           <p>3. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong>, copie e cole acima.</p>
         </div>
 
@@ -327,7 +327,7 @@
       return JSON.parse(limpo);
     }
 
-    // RESOLVE O MODELO REAL DA SUA CHAVE DINAMICAMENTE
+    // RESOLVE O MODELO ATIVO DA SUA CONTA DINAMICAMENTE
     async function dispararRequisicaoGemini(chave, prompt) {
       let modelosValidos = [];
 
@@ -337,13 +337,12 @@
         if (dataLista.models && Array.isArray(dataLista.models)) {
           modelosValidos = dataLista.models
             .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-            .map(m => m.name); // Formato: "models/nome-do-modelo"
+            .map(m => m.name);
         }
       } catch (e) {}
 
-      // Se a listagem não retornar, usa os nomes nativos com prefixo completo
       if (modelosValidos.length === 0) {
-        modelosValidos = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-2.5-flash'];
+        modelosValidos = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-3.8-flash'];
       }
 
       let ultimoErro = '';
@@ -376,7 +375,7 @@
         }
       }
 
-      throw new Error(ultimoErro || 'Servidores temporariamente instáveis. Tente novamente em alguns segundos.');
+      throw new Error(ultimoErro || 'Servidores temporariamente instáveis. Tente novamente em instantes.');
     }
 
     async function invocarOraculoIA() {
@@ -407,7 +406,7 @@
       btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> O Oráculo está analisando...`;
       btn.disabled = true;
 
-      const prompt = `Analise o confronto no League of Legends:
+      const prompt = `Analise detalhadamente o confronto no League of Legends:
 Jogador: ${meu}
 Oponente: ${opo}
 Rota: ${rota}
@@ -418,9 +417,13 @@ Responda preenchendo obrigatoriamente este formato JSON:
   "spell1": "SummonerFlash",
   "spell2": "SummonerDot",
   "itemInicial": "1055",
-  "onda": "como gerir as tropas",
-  "early": "como trocar dano nos níveis 1 a 3",
-  "regra": "habilidade crítica a esquivar ou segredo do duelo"
+  "runaPrincipal": "Nome da Runa Chave ideal com uma breve justificativa de 5 palavras",
+  "itemPrioritario": "Primeiro grande item crítico a ser construído para anular o oponente",
+  "powerSpike": "Momento exato de pico de poder no confronto (ex: Nível 2, Nível 6, 1º Item Fechado)",
+  "lutasObjetivos": "Condição de vitória e posicionamento nas lutas de dragão/barão e rota lateral",
+  "onda": "Instrução tática objetiva de controle de onda de tropas",
+  "early": "Guia detalhado de trocas e postura nos níveis 1 ao 3",
+  "regra": "Habilidade crítica do oponente para desviar ou segredo essencial do duelo"
 }
 Valores aceitos em dificuldade: Fácil, Média, Difícil, Muito Difícil.
 Valores aceitos em spell1 e spell2: SummonerFlash, SummonerDot, SummonerTeleport, SummonerHaste, SummonerSmite, SummonerBarrier, SummonerExhaust, SummonerHeal.
@@ -439,6 +442,10 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
           spell1: analise.spell1 || 'SummonerFlash',
           spell2: analise.spell2 || 'SummonerTeleport',
           itemInicial: analise.itemInicial || '1055',
+          runaPrincipal: analise.runaPrincipal || 'Adapte ao seu estilo de jogo.',
+          itemPrioritario: analise.itemPrioritario || 'Item mítico/lendário principal padrão.',
+          powerSpike: analise.powerSpike || 'Nível 6',
+          lutasObjetivos: analise.lutasObjetivos || 'Lute agrupado com foco no carregador adversário.',
           onda: analise.onda || 'Não informado.',
           early: analise.early || 'Não informado.',
           regra: analise.regra || 'Não informado.'
@@ -477,6 +484,7 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
           <span class="text-[11px] text-amber-400 font-semibold flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Análise de Mestre</span>
         </div>
 
+        <!-- DOCK DE VS COM FOTOS -->
         <div class="flex items-center justify-around py-3 px-4 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-5">
           <div class="flex flex-col items-center gap-1 w-28">
             <img src="${getAvatarUrl(m.meuCampeao)}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20">
@@ -489,19 +497,45 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
           </div>
         </div>
 
-        <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 rounded-xl border border-hexborder/40 mb-5 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
-            <img src="${getSpellUrl(m.spell1)}" class="w-6 h-6 rounded border border-amber-500/40">
-            <img src="${getSpellUrl(m.spell2)}" class="w-6 h-6 rounded border border-amber-500/40">
+        <!-- LINHA 1: BUILD, RUNA E FEITIÇOS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-hexborder/40 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
+              <img src="${getSpellUrl(m.spell1)}" class="w-6 h-6 rounded border border-amber-500/40">
+              <img src="${getSpellUrl(m.spell2)}" class="w-6 h-6 rounded border border-amber-500/40">
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
+              <img src="${getItemUrl(m.itemInicial)}" class="w-6 h-6 rounded border border-cyan-500/40">
+              <span class="text-xs text-slate-200 font-semibold truncate max-w-[80px]">${nomesItens[m.itemInicial] || 'Item'}</span>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
-            <img src="${getItemUrl(m.itemInicial)}" class="w-6 h-6 rounded border border-cyan-500/40">
-            <span class="text-xs text-slate-200 font-semibold">${nomesItens[m.itemInicial] || 'Item'}</span>
+
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-hexborder/40 text-xs flex flex-col justify-center">
+            <span class="text-[10px] uppercase font-bold text-amber-400 flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Runa Chave</span>
+            <p class="text-slate-200 font-semibold text-xs mt-0.5">${m.runaPrincipal || 'Conquistador / Runa Padrão'}</p>
+          </div>
+
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-hexborder/40 text-xs flex flex-col justify-center">
+            <span class="text-[10px] uppercase font-bold text-cyan-400 flex items-center gap-1"><i data-lucide="sword" class="w-3.5 h-3.5"></i> 1º Item Crítico</span>
+            <p class="text-slate-200 font-semibold text-xs mt-0.5 truncate">${m.itemPrioritario || 'Item Lendário Principal'}</p>
           </div>
         </div>
 
+        <!-- LINHA 2: POWER SPIKE & TEAMFIGHT -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-xs">
+          <div class="bg-[#0a0e17]/80 p-3 rounded-xl border border-amber-500/20">
+            <span class="font-bold text-amber-400 flex items-center gap-1.5 mb-1"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Power Spike (Janela de Força)</span>
+            <p class="text-slate-300 leading-relaxed text-[11px]">${m.powerSpike || 'Nível 6'}</p>
+          </div>
+          <div class="bg-[#0a0e17]/80 p-3 rounded-xl border border-cyan-500/20">
+            <span class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Lutas de Dragão & Objetivos</span>
+            <p class="text-slate-300 leading-relaxed text-[11px]">${m.lutasObjetivos || 'Lute agrupado e controle a visão dos flancos.'}</p>
+          </div>
+        </div>
+
+        <!-- LINHA 3: MICRO-GAMEPLAY & ROTA -->
         <div class="space-y-3 text-xs">
           <div>
             <p class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1"><i data-lucide="waves" class="w-3.5 h-3.5"></i> Gestão de Onda</p>
@@ -526,12 +560,16 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
     function copiarDicaAtual() {
       if (!confrontoAtualExibido) return;
       const m = confrontoAtualExibido;
-      const txt = `[Grimório LoL - Oráculo IA] ${m.meuCampeao} vs ${m.oponente} (${m.rota})
+      const txt = `[Grimório LoL] ${m.meuCampeao} vs ${m.oponente} (${m.rota})
 Dificuldade: ${m.dificuldade}
-Onda: ${m.onda}
+Runa Ideal: ${m.runaPrincipal}
+1º Item: ${m.itemPrioritario}
+Power Spike: ${m.powerSpike}
+Gestão de Onda: ${m.onda}
 Early (1-3): ${m.early}
-Regra Crítica: ${m.regra}`;
-      navigator.clipboard.writeText(txt).then(() => alert('Plano tático copiado!'));
+Regra Crítica: ${m.regra}
+Lutas/Objetivos: ${m.lutasObjetivos}`;
+      navigator.clipboard.writeText(txt).then(() => alert('Plano tático completo copiado!'));
     }
 
     function obterHistorico() {
