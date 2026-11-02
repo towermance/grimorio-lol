@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grimório LoL - O Seu Guia Tático de Matchups</title>
-  <!-- Tailwind CSS & Lucide Icons -->
+  <title>Grimório LoL - Oráculo Tático com IA</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -12,8 +11,8 @@
       theme: {
         extend: {
           colors: {
-            hexbg: '#0a0e17',
-            hexcard: '#121a29',
+            hexbg: '#080c14',
+            hexcard: '#0f1726',
             hexborder: '#1e293b',
             hexgold: '#c89b3c',
             hexcyan: '#0ac8b9'
@@ -25,425 +24,152 @@
 </head>
 <body class="bg-hexbg text-slate-100 min-h-screen font-sans selection:bg-amber-500/30 selection:text-amber-200">
 
-  <!-- CABEÇALHO -->
-  <header class="border-b border-hexborder bg-[#0f172a]/90 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+  <!-- TOPO COMPACTO -->
+  <header class="border-b border-hexborder/60 bg-[#0b111e]/90 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <a href="?" class="flex items-center gap-3 group">
-          <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-black font-black text-lg shadow-md shadow-amber-500/20 group-hover:scale-105 transition">
-            G
-          </div>
-          <div>
-            <h1 class="text-lg font-bold tracking-wide text-hexgold">Grimório LoL</h1>
-            <p class="text-xs text-slate-400">Caderno Tático & Oráculo IA de Confrontos</p>
-          </div>
-        </a>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-amber-300 flex items-center justify-center text-black font-black text-lg shadow-md shadow-amber-500/20">
+          G
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-hexgold tracking-wide">Grimório LoL</h1>
+          <p class="text-[11px] text-slate-400">Oráculo Tático em Tempo Real com IA</p>
+        </div>
       </div>
       
+      <!-- BOTÕES DE CONFIGURAÇÃO E BACKUP -->
       <div class="flex items-center gap-2">
-        <!-- CONFIGURAR CHAVE GEMINI IA -->
-        <button onclick="abrirModalChaveIA()" id="btnConfigIA" title="Configurar Chave Gemini IA" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          <span class="hidden md:inline font-medium text-xs">Chave IA</span>
+        <button onclick="abrirModalChaveIA()" id="btnConfigIA" title="Configurar Chave Gemini IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="textoStatusChave">Configurar Chave IA</span>
         </button>
-
-        <!-- RESTAURAR DADOS ORIGINAIS -->
-        <button onclick="restaurarPadrao()" title="Restaurar Confrontos Originais" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
-          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-        </button>
-
-        <!-- BACKUP LOCAL -->
-        <button onclick="exportarDados()" title="Transferir Cópia de Segurança (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
-          <i data-lucide="download" class="w-4 h-4"></i>
-        </button>
-        <label title="Restaurar Cópia de Segurança" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
-          <i data-lucide="upload" class="w-4 h-4"></i>
-          <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
-        </label>
-
-        <!-- NOVO CONFRONTO MANUAL OU COM IA -->
-        <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">Novo</span> Confronto
+        <button onclick="limparHistorico()" title="Limpar histórico local" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-lg text-xs border border-hexborder transition">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- CONSULTA RÁPIDA DE ORÁCULO IA -->
-    <div class="bg-gradient-to-r from-[#121a29] to-[#0f172a] border border-amber-500/30 p-4 rounded-xl mb-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3 w-full md:w-auto">
-        <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
-          <i data-lucide="swords" class="w-5 h-5"></i>
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    
+    <!-- ÁREA PRINCIPAL: O ARENA SELECTOR -->
+    <div class="bg-gradient-to-b from-[#121c2e] to-hexcard border border-amber-500/30 p-6 md:p-8 rounded-2xl shadow-2xl relative overflow-hidden mb-10">
+      <div class="absolute -top-24 -left-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center max-w-lg mx-auto mb-6">
+        <span class="text-[10px] uppercase font-black tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">Inteligência Tática</span>
+        <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-2">Qual confronto vamos vencer agora?</h2>
+        <p class="text-xs text-slate-400 mt-1">Escolha os dois campeões e a rota para gerar a estratégia completa na hora.</p>
+      </div>
+
+      <!-- SELEÇÃO VISUAL DE CAMPEÕES (VS DOCK) -->
+      <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
+        
+        <!-- O SEU CAMPEÃO -->
+        <div class="md:col-span-3 bg-[#0a0e17]/90 border border-amber-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
+          <img id="avatarMeu" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20 flex-shrink-0">
+          <div class="flex-1">
+            <label class="block text-[11px] font-bold text-amber-400 uppercase tracking-wider mb-1">Você joga de:</label>
+            <input type="text" id="meuChamp" list="listaCampeoes" oninput="atualizarAvatar('meuChamp', 'avatarMeu')" placeholder="Ex: Sett, Mordekaiser..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold focus:border-amber-400 focus:outline-none transition">
+          </div>
         </div>
-        <div>
-          <h2 class="text-sm font-bold text-slate-200">Com quem vai jogar agora?</h2>
-          <p class="text-xs text-slate-400">Filtre seus confrontos ou consulte a IA instantaneamente</p>
+
+        <!-- ROTA & VS -->
+        <div class="md:col-span-1 flex flex-col items-center justify-center gap-1">
+          <span class="text-xs font-black tracking-widest text-slate-500">VS</span>
+          <select id="rotaDuelo" class="bg-slate-900 border border-hexborder rounded-lg px-2 py-1 text-xs text-slate-300 font-bold focus:outline-none focus:border-amber-400">
+            <option value="TOP">TOP</option>
+            <option value="JUNGLE">JG</option>
+            <option value="MID">MID</option>
+            <option value="ADC">ADC</option>
+            <option value="SUP">SUP</option>
+          </select>
+        </div>
+
+        <!-- CAMPEÃO OPONENTE -->
+        <div class="md:col-span-3 bg-[#0a0e17]/90 border border-rose-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
+          <div class="flex-1 text-right">
+            <label class="block text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1">Contra oponente:</label>
+            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Warwick, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
+          </div>
+          <img id="avatarOpo" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20 flex-shrink-0">
         </div>
       </div>
-      
-      <div class="flex items-center gap-2 w-full md:w-auto">
-        <div class="relative w-full md:w-64">
-          <i data-lucide="user-check" class="w-4 h-4 text-amber-400 absolute left-3 top-3"></i>
-          <input 
-            type="text" 
-            id="campoMeuChamp" 
-            list="listaCampeoes" 
-            oninput="aoDigitarMeuCampeao(this.value)" 
-            placeholder="O seu campeão..." 
-            class="w-full bg-[#0a0e17] border border-amber-500/40 rounded-lg pl-9 pr-4 py-2 text-sm text-amber-300 font-semibold placeholder:text-slate-500 focus:border-hexgold focus:outline-none transition shadow-inner">
-        </div>
-        <button onclick="limparFiltroChamp()" title="Limpar e ver todos" class="p-2.5 text-slate-400 hover:text-slate-200 bg-slate-800 rounded-lg text-xs border border-hexborder hover:border-slate-600 transition">
-          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+
+      <!-- BOTÃO CENTRAL DE CONSULTA IA -->
+      <div class="mt-6 flex justify-center">
+        <button onclick="invocarOraculoIA()" id="btnInvocar" class="w-full md:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Consultar Oráculo (IA)</span>
         </button>
       </div>
     </div>
 
-    <!-- BARRA DE PESQUISA E FILTROS -->
-    <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
-      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div class="relative w-full md:w-96">
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-          <input type="text" id="campoBusca" oninput="renderizarMatchups()" placeholder="Pesquisar por oponente ou notas..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg pl-9 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-hexgold transition">
-        </div>
-
-        <div class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1">
-          <button onclick="filtrarRota('ALL', this)" class="btn-rota active px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">Todas as Rotas</button>
-          <button onclick="filtrarRota('TOP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Top</button>
-          <button onclick="filtrarRota('JUNGLE', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Jungle</button>
-          <button onclick="filtrarRota('MID', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Mid</button>
-          <button onclick="filtrarRota('ADC', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">ADC</button>
-          <button onclick="filtrarRota('SUP', this)" class="btn-rota px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200">Suporte</button>
-        </div>
+    <!-- ÁREA DE EXIBIÇÃO DO RESULTADO ATIVO DA IA -->
+    <div id="blocoResultadoIA" class="hidden mb-12 animate-fade-in">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Plano Tático Gerado
+        </h3>
+        <button onclick="copiarDicaAtual()" class="text-xs text-amber-300 hover:text-amber-200 bg-amber-500/10 border border-amber-500/30 px-2.5 py-1 rounded flex items-center gap-1.5 transition">
+          <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Estratégia
+        </button>
       </div>
-
-      <div class="flex items-center gap-2 pt-2 border-t border-hexborder/60 text-xs">
-        <span class="text-slate-400 font-semibold flex items-center gap-1"><i data-lucide="filter" class="w-3.5 h-3.5 text-amber-400"></i> Dificuldade:</span>
-        <div class="flex gap-1.5 flex-wrap">
-          <button onclick="filtrarDificuldade('ALL', this)" class="btn-dif active px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-medium">Todas</button>
-          <button onclick="filtrarDificuldade('Fácil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-emerald-400 hover:bg-slate-800 font-medium">Fácil</button>
-          <button onclick="filtrarDificuldade('Média', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-amber-400 hover:bg-slate-800 font-medium">Média</button>
-          <button onclick="filtrarDificuldade('Difícil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-orange-400 hover:bg-slate-800 font-medium">Difícil</button>
-          <button onclick="filtrarDificuldade('Muito Difícil', this)" class="btn-dif px-2.5 py-1 rounded bg-slate-800/60 text-rose-400 hover:bg-slate-800 font-medium">Muito Difícil</button>
-        </div>
-      </div>
+      <div id="cardResultado" class="bg-hexcard border border-amber-500/40 rounded-2xl p-6 shadow-2xl"></div>
     </div>
 
-    <!-- GRADE DE CARDS -->
-    <div id="gradeMatchups" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <!-- HISTÓRICO DE CONFRONTOS SALVOS -->
+    <div>
+      <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-2">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="history" class="w-4 h-4 text-slate-400"></i> Confrontos Salvos em Memória
+        </h3>
+        <span id="contadorHistorico" class="text-xs text-slate-500 font-semibold">0 confrontos</span>
+      </div>
+      <div id="gradeHistorico" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
   </main>
 
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL DE CONFIGURAÇÃO DA CHAVE GEMINI -->
+  <!-- MODAL DE CONFIGURAÇÃO DE CHAVE IA -->
   <div id="modalChaveIA" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border border-hexborder w-full max-w-md rounded-2xl p-6 shadow-2xl">
       <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
         <div class="flex items-center gap-2">
-          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
-          <h3 class="text-base font-bold text-hexgold">Configurar Chave Gemini IA</h3>
+          <i data-lucide="key" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="text-base font-bold text-hexgold">Chave do Gemini IA</h3>
         </div>
         <button onclick="fecharModalChaveIA()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="space-y-4 text-xs">
         <p class="text-slate-300 leading-relaxed">
-          Para que a IA crie confrontos automaticamente para qualquer campeão, insira a sua chave gratuita da API do Gemini. A chave fica guardada apenas no seu próprio navegador.
+          O Grimório consulta o modelo oficial Gemini para gerar o plano de jogo de qualquer campeão. A chave fica guardada apenas no seu computador.
         </p>
         <div>
           <label class="block text-slate-400 mb-1 font-semibold">Chave de API (começa com AIza...)</label>
           <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm text-amber-200 focus:border-hexgold focus:outline-none">
         </div>
         <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
-          <p class="font-semibold text-slate-300">Como obter a chave gratuita:</p>
-          <p>1. Aceda a <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 hover:underline">aistudio.google.com</a> com a sua conta Google.</p>
-          <p>2. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong> e cole aqui.</p>
+          <p class="font-semibold text-slate-300">Como obter sua chave gratuita:</p>
+          <p>1. Acesse <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 hover:underline">aistudio.google.com</a> com sua conta Google.</p>
+          <p>2. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong> e cole acima.</p>
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="fecharModalChaveIA()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="button" onclick="salvarChaveIA()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Guardar Chave</button>
+          <button type="button" onclick="salvarChaveIA()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Salvar Chave</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- MODAL DE CONFRONTO (MANUAL OU COM IA) -->
-  <div id="modalForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-hexcard border border-hexborder w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-      <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
-        <h3 id="tituloModal" class="text-base font-bold text-hexgold">Adicionar Confronto</h3>
-        <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <!-- BOTÃO GERAR COM IA -->
-      <div class="bg-gradient-to-r from-amber-500/10 to-cyan-500/10 border border-amber-500/20 p-3 rounded-xl mb-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-          <span class="text-xs font-medium text-slate-200">Preencha o seu campeão e o oponente abaixo:</span>
-        </div>
-        <button type="button" onclick="gerarAnaliseIA()" id="btnGerarIA" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
-          <i data-lucide="bot" class="w-3.5 h-3.5"></i> Consultar IA
-        </button>
-      </div>
-
-      <form id="formMatchup" onsubmit="salvarMatchup(event)" class="space-y-4">
-        <input type="hidden" id="matchupId">
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">O Seu Campeão</label>
-            <input type="text" id="meuCampeao" list="listaCampeoes" required placeholder="Ex: Sett" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Campeão Oponente</label>
-            <input type="text" id="oponente" list="listaCampeoes" required placeholder="Ex: Warwick" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Rota</label>
-            <select id="rota" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
-              <option value="TOP">Top</option>
-              <option value="JUNGLE">Jungle</option>
-              <option value="MID">Mid</option>
-              <option value="ADC">ADC</option>
-              <option value="SUP">Suporte</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Dificuldade</label>
-            <select id="dificuldade" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
-              <option value="Fácil">Fácil</option>
-              <option value="Média">Média</option>
-              <option value="Difícil">Difícil</option>
-              <option value="Muito Difícil">Muito Difícil</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4 bg-[#0a0e17]/60 p-3 rounded-lg border border-hexborder/60">
-          <div>
-            <label class="block text-xs font-semibold text-amber-300 mb-1">Feitiço 1 & 2</label>
-            <div class="grid grid-cols-2 gap-1.5">
-              <select id="spell1" class="bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
-                <option value="SummonerFlash">Flash</option>
-                <option value="SummonerDot">Incendiar</option>
-                <option value="SummonerTeleport">Teleporte</option>
-                <option value="SummonerHaste">Fantasma</option>
-                <option value="SummonerSmite">Golpear</option>
-                <option value="SummonerBarrier">Barreira</option>
-                <option value="SummonerExhaust">Exaustão</option>
-                <option value="SummonerHeal">Curar</option>
-              </select>
-              <select id="spell2" class="bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
-                <option value="SummonerTeleport">Teleporte</option>
-                <option value="SummonerDot">Incendiar</option>
-                <option value="SummonerFlash">Flash</option>
-                <option value="SummonerHaste">Fantasma</option>
-                <option value="SummonerSmite">Golpear</option>
-                <option value="SummonerBarrier">Barreira</option>
-                <option value="SummonerExhaust">Exaustão</option>
-                <option value="SummonerHeal">Curar</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-cyan-300 mb-1">Item Inicial</label>
-            <select id="itemInicial" class="w-full bg-slate-900 border border-hexborder rounded px-2 py-1.5 text-xs text-slate-200">
-              <option value="1055">Lâmina de Doran</option>
-              <option value="1054">Escudo de Doran</option>
-              <option value="1056">Anel de Doran</option>
-              <option value="2033">Poção Corrupta</option>
-              <option value="3070">Lágrima da Deusa</option>
-              <option value="1036">Espada Longa</option>
-              <option value="1082">Lacre Sombrio</option>
-              <option value="1039">Cria-Caminho (Jungle)</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Onda / Vaga de Tropas</label>
-          <input type="text" id="onda" placeholder="Ex: Deixar vir no nível 1 e congelar junto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Nível 1 ao 3 (Trocas Iniciais)</label>
-          <textarea id="early" rows="2" placeholder="Ex: Evite trocar dano no nível 1. Espere pelo nível 3..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Regra Fundamental / Habilidade Crítica</label>
-          <textarea id="regra" rows="2" placeholder="Ex: Guarde sempre o dash para desviar da habilidade principal dele..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none"></textarea>
-        </div>
-
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="fecharModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Guardar Confronto</button>
-        </div>
-      </form>
     </div>
   </div>
 
   <script>
-    // DADOS INICIAIS BASE
-    const dadosIniciais = [
-      {
-        id: "sett_1", meuCampeao: "Sett", oponente: "Aatrox", rota: "TOP", dificuldade: "Média",
-        spell1: "SummonerFlash", spell2: "SummonerDot", itemInicial: "1055",
-        onda: "Deixe empurrar no nível 1-2 e mantenha a onda perto da sua torre.",
-        early: "Desvie dos limites do Q1 e Q2 dele andando para frente ou lados. No nível 3, use o E para puxá-lo quando ele tentar o Q3.",
-        regra: "Use o W com a barra de determinação cheia mirando no centro verdadeiro após ele gastar o avanço (E)."
-      },
-      {
-        id: "mord_2", meuCampeao: "Mordekaiser", oponente: "Darius", rota: "TOP", dificuldade: "Difícil",
-        spell1: "SummonerFlash", spell2: "SummonerHaste", itemInicial: "1054",
-        onda: "Deixe a onda congelada na sua torre. Darius quer perseguição em rota longa.",
-        early: "Farme e cutuque com o Q na ponta máxima. Nunca use o E para puxar o Darius para perto de você nos níveis 1-5.",
-        regra: "Puxe o Darius com o E para longe caso ele venha correndo, ou use o E para cancelar a corrida dele."
-      },
-      {
-        id: "jax_2", meuCampeao: "Jax", oponente: "Camille", rota: "TOP", dificuldade: "Fácil",
-        spell1: "SummonerFlash", spell2: "SummonerTeleport", itemInicial: "1055",
-        onda: "Mantenha a onda equilibrada.",
-        early: "Ative o E do Jax assim que ela ativar o Q2 dela (o golpe de dano verdadeiro com barulho agudo).",
-        regra: "Quando ela pular na parede com o gancho, ligue o E imediatamente para negar o atordoamento e atordoá-la de volta."
-      }
-    ];
-
-    // CARREGAMENTO SEGURO
-    let matchups = [];
-    try {
-      const dadosLocais = JSON.parse(localStorage.getItem('grimorio_matchups'));
-      if (Array.isArray(dadosLocais) && dadosLocais.length > 0) {
-        matchups = dadosLocais;
-      } else {
-        matchups = [...dadosIniciais];
-        localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
-      }
-    } catch (e) {
-      matchups = [...dadosIniciais];
-      localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
-    }
-
-    let rotaAtiva = 'ALL';
-    let difAtiva = 'ALL';
-    let champFiltroAtivo = '';
-
-    // GESTÃO DA CHAVE DE API GEMINI
-    function obterChaveIA() {
-      return localStorage.getItem('grimorio_gemini_api_key') || '';
-    }
-
-    function abrirModalChaveIA() {
-      document.getElementById('inputApiKey').value = obterChaveIA();
-      document.getElementById('modalChaveIA').classList.remove('hidden');
-    }
-
-    function fecharModalChaveIA() {
-      document.getElementById('modalChaveIA').classList.add('hidden');
-    }
-
-    function salvarChaveIA() {
-      const chave = document.getElementById('inputApiKey').value.trim();
-      if (chave) {
-        localStorage.setItem('grimorio_gemini_api_key', chave);
-        alert('Chave Gemini IA guardada com sucesso!');
-      } else {
-        localStorage.removeItem('grimorio_gemini_api_key');
-        alert('Chave removida.');
-      }
-      fecharModalChaveIA();
-      atualizarIndicadorChave();
-    }
-
-    function atualizarIndicadorChave() {
-      const btn = document.getElementById('btnConfigIA');
-      if (obterChaveIA()) {
-        btn.classList.add('border-amber-500/60', 'text-amber-300');
-      } else {
-        btn.classList.remove('border-amber-500/60', 'text-amber-300');
-      }
-    }
-
-    // CHAMADA AO MODELO GEMINI
-    async function gerarAnaliseIA() {
-      const chave = obterChaveIA();
-      if (!chave) {
-        alert('Por favor, configure primeiro a sua Chave Gemini IA no botão do topo!');
-        abrirModalChaveIA();
-        return;
-      }
-
-      const meuChamp = document.getElementById('meuCampeao').value.trim();
-      const opoChamp = document.getElementById('oponente').value.trim();
-      const rota = document.getElementById('rota').value;
-
-      if (!meuChamp || !opoChamp) {
-        alert('Preencha o seu campeão e o oponente primeiro para a IA analisar!');
-        return;
-      }
-
-      const btn = document.getElementById('btnGerarIA');
-      const textoOriginal = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> A analisar...`;
-      btn.disabled = true;
-
-      const prompt = `Você é um analista Challenger de League of Legends. Analise o confronto: ${meuChamp} (jogador) contra ${opoChamp} (oponente) na rota ${rota}.
-Retorne APENAS um objeto JSON válido (sem formatação markdown extra, sem crases no início ou fim, apenas o JSON puro) com a seguinte estrutura:
-{
-  "dificuldade": "Fácil" ou "Média" ou "Difícil" ou "Muito Difícil",
-  "spell1": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
-  "spell2": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
-  "itemInicial": "1055" (Lâmina Doran) ou "1054" (Escudo Doran) ou "1056" (Anel Doran) ou "2033" (Poção Corrupta) ou "1036" (Espada Longa) ou "1082" (Lacre) ou "1039" (Jungle),
-  "onda": "Instrução concisa de 1 a 2 frases sobre gestão de onda/minions",
-  "early": "Dica prática de trocas nos níveis 1 a 3 em 1 a 2 frases",
-  "regra": "Regra fundamental ou habilidade crítica do adversário a respeitar em 1 a 2 frases"
-}`;
-
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${chave}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('Erro na API da Google: verifique se a chave é válida e possui cota.');
-        }
-
-        const data = await response.json();
-        let respostaTexto = data.candidates[0].content.parts[0].text.trim();
-        respostaTexto = respostaTexto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
-
-        const analise = JSON.parse(respostaTexto);
-
-        if (analise.dificuldade) document.getElementById('dificuldade').value = analise.dificuldade;
-        if (analise.spell1) document.getElementById('spell1').value = analise.spell1;
-        if (analise.spell2) document.getElementById('spell2').value = analise.spell2;
-        if (analise.itemInicial) document.getElementById('itemInicial').value = analise.itemInicial;
-        if (analise.onda) document.getElementById('onda').value = analise.onda;
-        if (analise.early) document.getElementById('early').value = analise.early;
-        if (analise.regra) document.getElementById('regra').value = analise.regra;
-
-        alert('Confronto analisado com sucesso pela IA! Verifique as notas e clique em Guardar.');
-      } catch (err) {
-        alert('Erro ao consultar a IA: ' + err.message);
-      } finally {
-        btn.innerHTML = textoOriginal;
-        btn.disabled = false;
-        lucide.createIcons();
-      }
-    }
-
-    // RIOT DATA DRAGON
     const RIOT_VERSION = '14.10.1';
     let listaChamps = [];
+    let confrontoAtualExibido = null;
 
+    // RIOT DATA DRAGON
     async function carregarCampeoesRiot() {
       try {
         const res = await fetch(`https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/data/pt_BR/champion.json`);
@@ -493,322 +219,293 @@ Retorne APENAS um objeto JSON válido (sem formatação markdown extra, sem cras
       '1082': 'Lacre Sombrio', '1039': 'Cria-Caminho'
     };
 
-    function restaurarPadrao() {
-      if (confirm('Deseja restaurar a base de confrontos original?')) {
-        matchups = [...dadosIniciais];
-        localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
-        champFiltroAtivo = '';
-        const input = document.getElementById('campoMeuChamp');
-        if (input) input.value = '';
-        renderizarMatchups();
+    function atualizarAvatar(inputId, imgId) {
+      const val = document.getElementById(inputId).value.trim();
+      const img = document.getElementById(imgId);
+      if (val.length >= 3) {
+        img.src = getAvatarUrl(val);
+      } else {
+        img.src = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg';
       }
     }
 
-    function salvarNoLocalStorage() {
-      localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
+    // GESTÃO DE CHAVE GEMINI
+    function obterChaveIA() {
+      return localStorage.getItem('grimorio_gemini_api_key') || '';
     }
 
-    function aoDigitarMeuCampeao(valor) {
-      champFiltroAtivo = valor.trim();
-      renderizarMatchups();
+    function abrirModalChaveIA() {
+      document.getElementById('inputApiKey').value = obterChaveIA();
+      document.getElementById('modalChaveIA').classList.remove('hidden');
     }
 
-    function limparFiltroChamp() {
-      champFiltroAtivo = '';
-      const input = document.getElementById('campoMeuChamp');
-      if (input) input.value = '';
-      renderizarMatchups();
+    function fecharModalChaveIA() {
+      document.getElementById('modalChaveIA').classList.add('hidden');
     }
 
-    function partilharLink(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      const urlBase = window.location.origin + window.location.pathname;
-      const urlPartilha = `${urlBase}?meu=${encodeURIComponent(m.meuCampeao)}&vs=${encodeURIComponent(m.oponente)}`;
-      navigator.clipboard.writeText(urlPartilha).then(() => {
-        alert('Link copiado com sucesso!');
-      });
-    }
-
-    function copiarDicas(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      const texto = `[Grimório LoL] ${m.meuCampeao} vs ${m.oponente} (${m.rota})\nDificuldade: ${m.dificuldade}\nOnda: ${m.onda || 'N/A'}\nInício: ${m.early || 'N/A'}\nRegra: ${m.regra || 'N/A'}`;
-      navigator.clipboard.writeText(texto).then(() => {
-        alert('Plano tático copiado com sucesso!');
-      });
-    }
-
-    function verificarParametrosUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const meu = params.get('meu');
-      const vs = params.get('vs');
-      if (meu) {
-        champFiltroAtivo = meu;
-        const inputMeu = document.getElementById('campoMeuChamp');
-        if (inputMeu) inputMeu.value = meu;
+    function salvarChaveIA() {
+      const chave = document.getElementById('inputApiKey').value.trim();
+      if (chave) {
+        localStorage.setItem('grimorio_gemini_api_key', chave);
+        alert('Chave salva com sucesso!');
+      } else {
+        localStorage.removeItem('grimorio_gemini_api_key');
+        alert('Chave removida.');
       }
-      if (vs) {
-        const busca = document.getElementById('campoBusca');
-        if (busca) busca.value = vs;
+      fecharModalChaveIA();
+      atualizarStatusChave();
+    }
+
+    function atualizarStatusChave() {
+      const temChave = !!obterChaveIA();
+      const texto = document.getElementById('textoStatusChave');
+      const btn = document.getElementById('btnConfigIA');
+      if (temChave) {
+        texto.innerText = 'Chave IA Ativa';
+        btn.classList.add('border-emerald-500/50', 'text-emerald-300', 'bg-emerald-500/10');
+        btn.classList.remove('border-amber-500/30', 'text-amber-300', 'bg-amber-500/10');
+      } else {
+        texto.innerText = 'Configurar Chave IA';
+        btn.classList.remove('border-emerald-500/50', 'text-emerald-300', 'bg-emerald-500/10');
+        btn.classList.add('border-amber-500/30', 'text-amber-300', 'bg-amber-500/10');
       }
     }
 
-    function renderizarMatchups() {
-      const container = document.getElementById('gradeMatchups');
-      if (!container) return;
-      const termo = (document.getElementById('campoBusca')?.value || '').toLowerCase();
-      const meuFiltro = champFiltroAtivo.toLowerCase();
-      
-      container.innerHTML = '';
-
-      const filtrados = matchups.filter(m => {
-        const correspondeRota = rotaAtiva === 'ALL' || m.rota === rotaAtiva;
-        const correspondeDif = difAtiva === 'ALL' || m.dificuldade === difAtiva;
-        const correspondeMeuChamp = !meuFiltro || m.meuCampeao.toLowerCase().includes(meuFiltro);
-        const correspondeBusca = m.meuCampeao.toLowerCase().includes(termo) || 
-                                 m.oponente.toLowerCase().includes(termo) ||
-                                 (m.regra && m.regra.toLowerCase().includes(termo)) ||
-                                 (m.early && m.early.toLowerCase().includes(termo));
-        return correspondeRota && correspondeDif && correspondeMeuChamp && correspondeBusca;
-      });
-
-      if (filtrados.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-16 text-slate-500">
-            <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-            <p class="font-medium text-slate-400">Nenhum confronto localizado.</p>
-            <p class="text-xs mt-1 text-slate-500">Crie este confronto em 2 segundos com o Oráculo IA:</p>
-            <button onclick="abrirModalComCampeoes()" class="mt-3 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5">
-              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Gerar Análise deste Confronto com IA
-            </button>
-          </div>
-        `;
-        lucide.createIcons();
+    // CONSULTA AO MODELO IA
+    async function invocarOraculoIA() {
+      const chave = obterChaveIA();
+      if (!chave) {
+        alert('Configure sua Chave Gemini gratuita no topo antes de consultar a IA!');
+        abrirModalChaveIA();
         return;
       }
 
-      filtrados.forEach(m => {
-        const corDificuldade = {
-          'Fácil': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-          'Média': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-          'Difícil': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-          'Muito Difícil': 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-        }[m.dificuldade] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+      const meu = document.getElementById('meuChamp').value.trim();
+      const opo = document.getElementById('oponenteChamp').value.trim();
+      const rota = document.getElementById('rotaDuelo').value;
 
-        const imgMeu = getAvatarUrl(m.meuCampeao);
-        const imgOpo = getAvatarUrl(m.oponente);
-        const s1 = m.spell1 || 'SummonerFlash';
-        const s2 = m.spell2 || 'SummonerDot';
-        const itemId = m.itemInicial || '1055';
+      if (!meu || !opo) {
+        alert('Digite o seu campeão e o oponente para consultar!');
+        return;
+      }
 
-        const card = document.createElement('div');
-        card.className = "bg-hexcard border border-hexborder hover:border-amber-500/40 transition duration-200 rounded-xl p-5 shadow-lg flex flex-col justify-between";
-        card.innerHTML = `
+      // Se já existir no histórico, puxa instantaneamente sem gastar requisição
+      const historico = obterHistorico();
+      const existente = historico.find(h => h.meuCampeao.toLowerCase() === meu.toLowerCase() && h.oponente.toLowerCase() === opo.toLowerCase() && h.rota === rota);
+      if (existente) {
+        exibirCardResultado(existente);
+        return;
+      }
+
+      const btn = document.getElementById('btnInvocar');
+      const htmlOriginal = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> O Oráculo está analisando...`;
+      btn.disabled = true;
+
+      const prompt = `Você é um analista Challenger e Treinador de League of Legends. Analise detalhadamente o confronto:
+Jogador: ${meu}
+Oponente: ${opo}
+Rota: ${rota}
+
+Retorne ESTRITAMENTE um JSON puro (sem markdown, sem crases, sem introduções) com estas chaves exatas:
+{
+  "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
+  "spell1": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "spell2": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "itemInicial": "1055" (Lâmina Doran) | "1054" (Escudo Doran) | "1056" (Anel Doran) | "2033" (Poção Corrupta) | "1036" (Espada Longa) | "1082" (Lacre) | "1039" (Jungle),
+  "onda": "Explique o controle de tropas ideal (puxar lento, congelar ou deixar vir)",
+  "early": "Como se comportar nas trocas nos níveis 1 ao 3",
+  "regra": "A habilidade crítica do adversário para esquivar ou o gatilho da vitória no duelo"
+}`;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${chave}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+
+        if (!res.ok) throw new Error('Falha ao comunicar com a IA. Verifique sua chave.');
+
+        const data = await res.json();
+        let respostaTexto = data.candidates[0].content.parts[0].text.trim();
+        respostaTexto = respostaTexto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+
+        const analise = JSON.parse(respostaTexto);
+        const novoConfronto = {
+          id: Date.now().toString(),
+          meuCampeao: meu,
+          oponente: opo,
+          rota: rota,
+          dificuldade: analise.dificuldade || 'Média',
+          spell1: analise.spell1 || 'SummonerFlash',
+          spell2: analise.spell2 || 'SummonerTeleport',
+          itemInicial: analise.itemInicial || '1055',
+          onda: analise.onda || 'Não informado.',
+          early: analise.early || 'Não informado.',
+          regra: analise.regra || 'Não informado.'
+        };
+
+        salvarNoHistorico(novoConfronto);
+        exibirCardResultado(novoConfronto);
+        renderizarHistorico();
+      } catch (err) {
+        alert('Erro: ' + err.message);
+      } finally {
+        btn.innerHTML = htmlOriginal;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    function exibirCardResultado(m) {
+      confrontoAtualExibido = m;
+      const bloco = document.getElementById('blocoResultadoIA');
+      const card = document.getElementById('cardResultado');
+
+      const corDificuldade = {
+        'Fácil': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+        'Média': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+        'Difícil': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
+        'Muito Difícil': 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+      }[m.dificuldade] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between border-b border-hexborder/60 pb-4 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-black px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">${m.rota}</span>
+            <span class="text-xs font-bold px-2.5 py-1 rounded border ${corDificuldade}">${m.dificuldade}</span>
+          </div>
+          <span class="text-[11px] text-amber-400 font-semibold flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Análise de Mestre</span>
+        </div>
+
+        <div class="flex items-center justify-around py-3 px-4 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-5">
+          <div class="flex flex-col items-center gap-1 w-28">
+            <img src="${getAvatarUrl(m.meuCampeao)}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" class="w-14 h-14 rounded-full border-2 border-amber-400 object-cover shadow-lg shadow-amber-500/20">
+            <span class="text-xs font-black text-amber-300 text-center truncate">${m.meuCampeao}</span>
+          </div>
+          <span class="text-sm font-black tracking-widest text-slate-600 italic">CONTRA</span>
+          <div class="flex flex-col items-center gap-1 w-28">
+            <img src="${getAvatarUrl(m.oponente)}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20">
+            <span class="text-xs font-black text-rose-300 text-center truncate">${m.oponente}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between px-4 py-2.5 bg-slate-900/60 rounded-xl border border-hexborder/40 mb-5 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
+            <img src="${getSpellUrl(m.spell1)}" class="w-6 h-6 rounded border border-amber-500/40">
+            <img src="${getSpellUrl(m.spell2)}" class="w-6 h-6 rounded border border-amber-500/40">
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
+            <img src="${getItemUrl(m.itemInicial)}" class="w-6 h-6 rounded border border-cyan-500/40">
+            <span class="text-xs text-slate-200 font-semibold">${nomesItens[m.itemInicial] || 'Item'}</span>
+          </div>
+        </div>
+
+        <div class="space-y-3 text-xs">
           <div>
-            <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${m.rota}</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="partilharLink('${m.id}')" title="Copiar Link" class="p-1 text-slate-400 hover:text-amber-300 transition"><i data-lucide="share-2" class="w-4 h-4"></i></button>
-                <button onclick="copiarDicas('${m.id}')" title="Copiar Texto" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                <button onclick="excluirMatchup('${m.id}')" title="Eliminar" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-              </div>
-            </div>
+            <p class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1"><i data-lucide="waves" class="w-3.5 h-3.5"></i> Gestão de Onda</p>
+            <p class="text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 leading-relaxed">${m.onda}</p>
+          </div>
+          <div>
+            <p class="font-bold text-amber-400 flex items-center gap-1.5 mb-1"><i data-lucide="swords" class="w-3.5 h-3.5"></i> Nível 1 ao 3 (Trocas Iniciais)</p>
+            <p class="text-slate-300 bg-slate-900/80 p-3 rounded-lg border border-slate-800 leading-relaxed">${m.early}</p>
+          </div>
+          <div>
+            <p class="font-bold text-amber-300 flex items-center gap-1.5 mb-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Regra Fundamental / Habilidade Crítica</p>
+            <p class="text-amber-200 bg-amber-950/20 p-3 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra}</p>
+          </div>
+        </div>
+      `;
 
-            <!-- VS BANNER COM FOTOS -->
-            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-3">
-              <div class="flex flex-col items-center gap-1 w-24">
-                <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
-                <span class="text-xs font-bold text-amber-300 text-center truncate max-w-full">${m.meuCampeao}</span>
-              </div>
+      bloco.classList.remove('hidden');
+      lucide.createIcons();
+      bloco.scrollIntoView({ behavior: 'smooth' });
+    }
 
-              <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
+    function copiarDicaAtual() {
+      if (!confrontoAtualExibido) return;
+      const m = confrontoAtualExibido;
+      const txt = `[Grimório LoL - Oráculo IA] ${m.meuCampeao} vs ${m.oponente} (${m.rota})
+Dificuldade: ${m.dificuldade}
+Onda: ${m.onda}
+Early (1-3): ${m.early}
+Regra Crítica: ${m.regra}`;
+      navigator.clipboard.writeText(txt).then(() => alert('Plano tático copiado!'));
+    }
 
-              <div class="flex flex-col items-center gap-1 w-24">
-                <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
-                <span class="text-xs font-bold text-rose-300 text-center truncate max-w-full">${m.oponente}</span>
-              </div>
-            </div>
+    // HISTÓRICO LOCAL
+    function obterHistorico() {
+      try {
+        return JSON.parse(localStorage.getItem('grimorio_historico_ia')) || [];
+      } catch (e) {
+        return [];
+      }
+    }
 
-            <!-- ITENS E FEITIÇOS -->
-            <div class="flex items-center justify-between px-3 py-2 bg-slate-900/40 rounded-lg border border-hexborder/40 mb-3 text-xs">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
-                <img src="${getSpellUrl(s1)}" class="w-5 h-5 rounded border border-amber-500/40">
-                <img src="${getSpellUrl(s2)}" class="w-5 h-5 rounded border border-amber-500/40">
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
-                <img src="${getItemUrl(itemId)}" class="w-5 h-5 rounded border border-cyan-500/40">
-                <span class="text-[11px] text-slate-300 font-medium">${nomesItens[itemId] || 'Item'}</span>
-              </div>
-            </div>
+    function salvarNoHistorico(item) {
+      let h = obterHistorico();
+      h = h.filter(x => !(x.meuCampeao === item.meuCampeao && x.oponente === item.oponente && x.rota === item.rota));
+      h.unshift(item);
+      localStorage.setItem('grimorio_historico_ia', JSON.stringify(h));
+    }
 
-            <!-- DICAS TÁTICAS -->
-            <div class="space-y-2.5 text-xs">
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i> Gestão de Onda
-                </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
-              </div>
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i> Nível 1 ao 3
-                </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
-              </div>
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra Fundamental
-                </p>
-                <p class="text-amber-200/90 bg-amber-950/20 p-2 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
-              </div>
-            </div>
+    function renderizarHistorico() {
+      const lista = obterHistorico();
+      const container = document.getElementById('gradeHistorico');
+      const contador = document.getElementById('contadorHistorico');
+      contador.innerText = `${lista.length} confrontos`;
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-8 text-slate-500 text-xs">
+            Nenhum confronto consultado ainda. Faça a sua primeira consulta acima!
           </div>
         `;
-        container.appendChild(card);
-      });
+        return;
+      }
+
+      container.innerHTML = lista.map(m => `
+        <div onclick='carregarDoHistorico(${JSON.stringify(m).replace(/'/g, "&apos;")})' class="bg-hexcard border border-hexborder hover:border-amber-500/40 p-4 rounded-xl cursor-pointer transition shadow hover:scale-[1.01] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <img src="${getAvatarUrl(m.meuCampeao)}" class="w-9 h-9 rounded-full border border-amber-400">
+            <span class="text-xs font-black text-slate-300">vs</span>
+            <img src="${getAvatarUrl(m.oponente)}" class="w-9 h-9 rounded-full border border-rose-500">
+            <div>
+              <p class="text-xs font-bold text-slate-200">${m.meuCampeao} vs ${m.oponente}</p>
+              <span class="text-[10px] text-slate-500 uppercase font-semibold">${m.rota} • ${m.dificuldade}</span>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500"></i>
+        </div>
+      `).join('');
 
       lucide.createIcons();
     }
 
-    function filtrarRota(rota, elemento) {
-      rotaAtiva = rota;
-      document.querySelectorAll('.btn-rota').forEach(btn => {
-        btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
-        btn.classList.add('bg-slate-800', 'text-slate-400');
-      });
-      elemento.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
-      elemento.classList.remove('bg-slate-800', 'text-slate-400');
-      renderizarMatchups();
+    function carregarDoHistorico(m) {
+      document.getElementById('meuChamp').value = m.meuCampeao;
+      document.getElementById('oponenteChamp').value = m.oponente;
+      document.getElementById('rotaDuelo').value = m.rota;
+      atualizarAvatar('meuChamp', 'avatarMeu');
+      atualizarAvatar('oponenteChamp', 'avatarOpo');
+      exibirCardResultado(m);
     }
 
-    function filtrarDificuldade(dif, elemento) {
-      difAtiva = dif;
-      document.querySelectorAll('.btn-dif').forEach(btn => {
-        btn.classList.remove('active', 'bg-slate-800', 'text-slate-300');
-        btn.classList.add('bg-slate-800/60');
-      });
-      elemento.classList.add('active', 'bg-slate-800', 'text-slate-300');
-      renderizarMatchups();
-    }
-
-    function abrirModalNovo() {
-      document.getElementById('formMatchup').reset();
-      document.getElementById('matchupId').value = '';
-      document.getElementById('tituloModal').innerText = 'Adicionar Confronto';
-      document.getElementById('modalForm').classList.remove('hidden');
-    }
-
-    function abrirModalComCampeoes() {
-      abrirModalNovo();
-      const meu = document.getElementById('campoMeuChamp').value.trim();
-      const opo = document.getElementById('campoBusca').value.trim();
-      if (meu) document.getElementById('meuCampeao').value = meu;
-      if (opo) document.getElementById('oponente').value = opo;
-      if (meu && opo) {
-        gerarAnaliseIA();
+    function limparHistorico() {
+      if (confirm('Deseja limpar todo o histórico de confrontos consultados?')) {
+        localStorage.removeItem('grimorio_historico_ia');
+        document.getElementById('blocoResultadoIA').classList.add('hidden');
+        renderizarHistorico();
       }
-    }
-
-    function fecharModal() {
-      document.getElementById('modalForm').classList.add('hidden');
-    }
-
-    function editarMatchup(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      document.getElementById('matchupId').value = m.id;
-      document.getElementById('meuCampeao').value = m.meuCampeao;
-      document.getElementById('oponente').value = m.oponente;
-      document.getElementById('rota').value = m.rota;
-      document.getElementById('dificuldade').value = m.dificuldade;
-      document.getElementById('spell1').value = m.spell1 || 'SummonerFlash';
-      document.getElementById('spell2').value = m.spell2 || 'SummonerTeleport';
-      document.getElementById('itemInicial').value = m.itemInicial || '1055';
-      document.getElementById('onda').value = m.onda || '';
-      document.getElementById('early').value = m.early || '';
-      document.getElementById('regra').value = m.regra || '';
-      
-      document.getElementById('tituloModal').innerText = 'Editar Confronto';
-      document.getElementById('modalForm').classList.remove('hidden');
-    }
-
-    function salvarMatchup(e) {
-      e.preventDefault();
-      const id = document.getElementById('matchupId').value;
-      const novo = {
-        id: id || Date.now().toString(),
-        meuCampeao: document.getElementById('meuCampeao').value.trim(),
-        oponente: document.getElementById('oponente').value.trim(),
-        rota: document.getElementById('rota').value,
-        dificuldade: document.getElementById('dificuldade').value,
-        spell1: document.getElementById('spell1').value,
-        spell2: document.getElementById('spell2').value,
-        itemInicial: document.getElementById('itemInicial').value,
-        onda: document.getElementById('onda').value.trim(),
-        early: document.getElementById('early').value.trim(),
-        regra: document.getElementById('regra').value.trim()
-      };
-
-      if (id) {
-        matchups = matchups.map(m => m.id === id ? novo : m);
-      } else {
-        matchups.unshift(novo);
-      }
-
-      salvarNoLocalStorage();
-      fecharModal();
-      renderizarMatchups();
-    }
-
-    function excluirMatchup(id) {
-      if (confirm('Tem a certeza de que pretende eliminar este confronto?')) {
-        matchups = matchups.filter(m => m.id !== id);
-        salvarNoLocalStorage();
-        renderizarMatchups();
-      }
-    }
-
-    function exportarDados() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchups, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `grimorio_lol_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importarDados(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const importados = JSON.parse(evt.target.result);
-          if (Array.isArray(importados) && importados.length > 0) {
-            matchups = importados;
-            salvarNoLocalStorage();
-            renderizarMatchups();
-            alert('Confrontos importados com sucesso!');
-          }
-        } catch (err) {
-          alert('Erro ao carregar o ficheiro JSON.');
-        }
-      };
-      reader.readAsText(file);
     }
 
     // INICIALIZAÇÃO
-    atualizarIndicadorChave();
-    verificarParametrosUrl();
-    renderizarMatchups();
+    atualizarStatusChave();
+    renderizarHistorico();
   </script>
 </body>
 </html>
