@@ -35,27 +35,33 @@
           </div>
           <div>
             <h1 class="text-lg font-bold tracking-wide text-hexgold">Grimório LoL</h1>
-            <p class="text-xs text-slate-400">Caderno Tático de Confrontos & Counters</p>
+            <p class="text-xs text-slate-400">Caderno Tático & Oráculo IA de Confrontos</p>
           </div>
         </a>
       </div>
       
       <div class="flex items-center gap-2">
+        <!-- CONFIGURAR CHAVE GEMINI IA -->
+        <button onclick="abrirModalChaveIA()" id="btnConfigIA" title="Configurar Chave Gemini IA" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition flex items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span class="hidden md:inline font-medium text-xs">Chave IA</span>
+        </button>
+
         <!-- RESTAURAR DADOS ORIGINAIS -->
         <button onclick="restaurarPadrao()" title="Restaurar Confrontos Originais" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="refresh-cw" class="w-4 h-4"></i>
         </button>
 
         <!-- BACKUP LOCAL -->
-        <button onclick="exportarDados()" title="Baixar Backup (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
+        <button onclick="exportarDados()" title="Transferir Cópia de Segurança (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="download" class="w-4 h-4"></i>
         </button>
-        <label title="Restaurar Backup" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
+        <label title="Restaurar Cópia de Segurança" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
           <i data-lucide="upload" class="w-4 h-4"></i>
           <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
         </label>
 
-        <!-- NOVO CONFRONTO -->
+        <!-- NOVO CONFRONTO MANUAL OU COM IA -->
         <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Novo</span> Confronto
@@ -65,7 +71,7 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
-    <!-- FILTRO RÁPIDO DO CAMPEÃO PRINCIPAL -->
+    <!-- CONSULTA RÁPIDA DE ORÁCULO IA -->
     <div class="bg-gradient-to-r from-[#121a29] to-[#0f172a] border border-amber-500/30 p-4 rounded-xl mb-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-3 w-full md:w-auto">
         <div class="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
@@ -73,19 +79,19 @@
         </div>
         <div>
           <h2 class="text-sm font-bold text-slate-200">Com quem vai jogar agora?</h2>
-          <p class="text-xs text-slate-400">Digite seu campeão para ver apenas os confrontos dele</p>
+          <p class="text-xs text-slate-400">Filtre seus confrontos ou consulte a IA instantaneamente</p>
         </div>
       </div>
       
       <div class="flex items-center gap-2 w-full md:w-auto">
-        <div class="relative w-full md:w-72">
+        <div class="relative w-full md:w-64">
           <i data-lucide="user-check" class="w-4 h-4 text-amber-400 absolute left-3 top-3"></i>
           <input 
             type="text" 
             id="campoMeuChamp" 
-            list="listaMeusChamps" 
+            list="listaCampeoes" 
             oninput="aoDigitarMeuCampeao(this.value)" 
-            placeholder="Ex: Darius, Renekton, Jax..." 
+            placeholder="O seu campeão..." 
             class="w-full bg-[#0a0e17] border border-amber-500/40 rounded-lg pl-9 pr-4 py-2 text-sm text-amber-300 font-semibold placeholder:text-slate-500 focus:border-hexgold focus:outline-none transition shadow-inner">
         </div>
         <button onclick="limparFiltroChamp()" title="Limpar e ver todos" class="p-2.5 text-slate-400 hover:text-slate-200 bg-slate-800 rounded-lg text-xs border border-hexborder hover:border-slate-600 transition">
@@ -93,8 +99,6 @@
         </button>
       </div>
     </div>
-
-    <datalist id="listaMeusChamps"></datalist>
 
     <!-- BARRA DE PESQUISA E FILTROS -->
     <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
@@ -132,12 +136,54 @@
 
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL DE CONFRONTO -->
+  <!-- MODAL DE CONFIGURAÇÃO DA CHAVE GEMINI -->
+  <div id="modalChaveIA" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-hexcard border border-hexborder w-full max-w-md rounded-2xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+          <h3 class="text-base font-bold text-hexgold">Configurar Chave Gemini IA</h3>
+        </div>
+        <button onclick="fecharModalChaveIA()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-4 text-xs">
+        <p class="text-slate-300 leading-relaxed">
+          Para que a IA crie confrontos automaticamente para qualquer campeão, insira a sua chave gratuita da API do Gemini. A chave fica guardada apenas no seu próprio navegador.
+        </p>
+        <div>
+          <label class="block text-slate-400 mb-1 font-semibold">Chave de API (começa com AIza...)</label>
+          <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm text-amber-200 focus:border-hexgold focus:outline-none">
+        </div>
+        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-[11px] text-slate-400 space-y-1">
+          <p class="font-semibold text-slate-300">Como obter a chave gratuita:</p>
+          <p>1. Aceda a <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 hover:underline">aistudio.google.com</a> com a sua conta Google.</p>
+          <p>2. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong> e cole aqui.</p>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="fecharModalChaveIA()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
+          <button type="button" onclick="salvarChaveIA()" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Guardar Chave</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFRONTO (MANUAL OU COM IA) -->
   <div id="modalForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border border-hexborder w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
-        <h3 id="tituloModal" class="text-base font-bold text-hexgold">Adicionar Novo Confronto</h3>
+        <h3 id="tituloModal" class="text-base font-bold text-hexgold">Adicionar Confronto</h3>
         <button onclick="fecharModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- BOTÃO GERAR COM IA -->
+      <div class="bg-gradient-to-r from-amber-500/10 to-cyan-500/10 border border-amber-500/20 p-3 rounded-xl mb-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+          <span class="text-xs font-medium text-slate-200">Preencha o seu campeão e o oponente abaixo:</span>
+        </div>
+        <button type="button" onclick="gerarAnaliseIA()" id="btnGerarIA" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-black text-xs font-bold px-3 py-1.5 rounded-lg shadow transition flex items-center gap-1.5">
+          <i data-lucide="bot" class="w-3.5 h-3.5"></i> Consultar IA
+        </button>
       </div>
 
       <form id="formMatchup" onsubmit="salvarMatchup(event)" class="space-y-4">
@@ -146,11 +192,11 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">O Seu Campeão</label>
-            <input type="text" id="meuCampeao" list="listaCampeoes" required placeholder="Ex: Renekton" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+            <input type="text" id="meuCampeao" list="listaCampeoes" required placeholder="Ex: Sett" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-400 mb-1">Campeão Oponente</label>
-            <input type="text" id="oponente" list="listaCampeoes" required placeholder="Ex: Aatrox" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+            <input type="text" id="oponente" list="listaCampeoes" required placeholder="Ex: Warwick" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
           </div>
         </div>
 
@@ -218,7 +264,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Onda / Minions</label>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Onda / Vaga de Tropas</label>
           <input type="text" id="onda" placeholder="Ex: Deixar vir no nível 1 e congelar junto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
         </div>
 
@@ -234,88 +280,39 @@
 
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="fecharModal()" class="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white">Cancelar</button>
-          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Salvar Confronto</button>
+          <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-semibold text-xs px-5 py-2 rounded-lg transition">Guardar Confronto</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    // LISTA PADRÃO COMPLETA E IMUTÁVEL DE BASE
+    // DADOS INICIAIS BASE
     const dadosIniciais = [
       {
-        id: "1", meuCampeao: "Renekton", oponente: "Aatrox", rota: "TOP", dificuldade: "Média",
+        id: "sett_1", meuCampeao: "Sett", oponente: "Aatrox", rota: "TOP", dificuldade: "Média",
         spell1: "SummonerFlash", spell2: "SummonerDot", itemInicial: "1055",
-        onda: "Deixe a onda vir no nível 1 e congele perto da sua torre.",
-        early: "Evite o Q1 e Q2 dele. No nível 3, entre com E, comba com W fortalecido e volte com E2 antes do Q3 dele cair.",
-        regra: "Comprar bota de armadura ou corta-cura no primeiro retorno anula o sustento dele."
+        onda: "Deixe empurrar no nível 1-2 e mantenha a onda perto da sua torre.",
+        early: "Desvie dos limites do Q1 e Q2 dele andando para frente ou lados. No nível 3, use o E para puxá-lo quando ele tentar o Q3.",
+        regra: "Use o W com a barra de determinação cheia mirando no centro verdadeiro após ele gastar o avanço (E)."
       },
       {
-        id: "2", meuCampeao: "Darius", oponente: "Garen", rota: "TOP", dificuldade: "Fácil",
-        spell1: "SummonerFlash", spell2: "SummonerHaste", itemInicial: "1055",
-        onda: "Mantenha a onda lenta empurrando. Garen não pode encostar nos minions sem apanhar.",
-        early: "Quando ele vier dar o Q com velocidade, acerte o W para desacelerar e guarde seu puxão (E) para a fuga dele.",
-        regra: "Nunca gaste o puxão (E) à toa antes dele gastar a corrida."
+        id: "mord_2", meuCampeao: "Mordekaiser", oponente: "Darius", rota: "TOP", dificuldade: "Difícil",
+        spell1: "SummonerFlash", spell2: "SummonerHaste", itemInicial: "1054",
+        onda: "Deixe a onda congelada na sua torre. Darius quer perseguição em rota longa.",
+        early: "Farme e cutuque com o Q na ponta máxima. Nunca use o E para puxar o Darius para perto de você nos níveis 1-5.",
+        regra: "Puxe o Darius com o E para longe caso ele venha correndo, ou use o E para cancelar a corrida dele."
       },
       {
-        id: "3", meuCampeao: "Jax", oponente: "Camille", rota: "TOP", dificuldade: "Fácil",
+        id: "jax_2", meuCampeao: "Jax", oponente: "Camille", rota: "TOP", dificuldade: "Fácil",
         spell1: "SummonerFlash", spell2: "SummonerTeleport", itemInicial: "1055",
-        onda: "Deixe a onda estável no meio até o nível 3.",
-        early: "Guarde o Contra-Ataque (E) para o segundo golpe do Q dela (dano verdadeiro).",
-        regra: "Quando ela pular na parede com o E, ative o seu E imediatamente para negar o atordoamento."
-      },
-      {
-        id: "4", meuCampeao: "Fiora", oponente: "Mordekaiser", rota: "TOP", dificuldade: "Média",
-        spell1: "SummonerFlash", spell2: "SummonerDot", itemInicial: "1055",
-        onda: "Evite ficar preso debaixo da torre dele. Manter a onda congelada no seu lado é o cenário perfeito.",
-        early: "Dance em volta dos vitais com o Q. Use o Ripostar (W) para bloquear o puxão (E) dele.",
-        regra: "Se reagir rápido, o W da Fiora pode bloquear a Ultimate do Mordekaiser enquanto ele ergue a maça."
-      },
-      {
-        id: "5", meuCampeao: "Ahri", oponente: "Zed", rota: "MID", dificuldade: "Difícil",
-        spell1: "SummonerFlash", spell2: "SummonerTeleport", itemInicial: "1056",
-        onda: "Pressione no nível 1-2. Do nível 3 em diante, mantenha a onda equilibrada.",
-        early: "Puna quando ele usar a sombra (W) para farmar. Sem sombra, ele fica 20 segundos vulnerável a ganks.",
-        regra: "Se ele ultar em você, jogue o Charme (E) imediatamente para trás do seu próprio campeão onde ele vai surgir."
-      },
-      {
-        id: "6", meuCampeao: "Yasuo", oponente: "Syndra", rota: "MID", dificuldade: "Média",
-        spell1: "SummonerFlash", spell2: "SummonerDot", itemInicial: "1055",
-        onda: "Deixe empurrar em você até o nível 2. Não tome poke de graça no nível 1.",
-        early: "Use a parede de vento (W) para bloquear a dispersão das esferas (E) ou a Ultimate completa dela.",
-        regra: "Sem a Parede de Vento, não vá para cima se ela tiver as esferas prontas."
-      },
-      {
-        id: "7", meuCampeao: "Sylas", oponente: "Malphite", rota: "MID", dificuldade: "Muito Fácil",
-        spell1: "SummonerFlash", spell2: "SummonerTeleport", itemInicial: "1056",
-        onda: "Puxe as primeiras ondas para garantir nível 2 e 3 rápido.",
-        early: "Você ganha todas as trocas curtas com W. O dano mágico do Sylas ignora o acúmulo de armadura do Malphite.",
-        regra: "Roube a ultimate dele no nível 6 e use para rodar pelo mapa (roam) nas rotas laterais."
-      },
-      {
-        id: "8", meuCampeao: "Lee Sin", oponente: "Master Yi", rota: "JUNGLE", dificuldade: "Fácil",
-        spell1: "SummonerFlash", spell2: "SummonerSmite", itemInicial: "1039",
-        onda: "Invada a selva dele no nível 3 se ele começar no lado oposto.",
-        early: "O Yi precisa farmar até o nível 6. Aplique pressão máxima nas rotas antes que ele compre o primeiro item.",
-        regra: "No 1v1, guarde seu Chute (R) para cancelar o W (meditação) do Yi e corte a cura dele."
-      },
-      {
-        id: "9", meuCampeao: "Jinx", oponente: "Draven", rota: "ADC", dificuldade: "Muito Difícil",
-        spell1: "SummonerFlash", spell2: "SummonerHeal", itemInicial: "1055",
-        onda: "Deixe ele empurrar. Nunca dispute pressão de rota no nível 1 contra os machados giratórios.",
-        early: "Farme à distância máxima com os foguetes (Q). Jogue as mordidinhas (E) exatamente onde o machado dele vai cair.",
-        regra: "Se o Draven pegar 1 abate cedo, jogue sob torre e espere a ajuda do seu caçador."
-      },
-      {
-        id: "10", meuCampeao: "Thresh", oponente: "Leona", rota: "SUP", dificuldade: "Média",
-        spell1: "SummonerFlash", spell2: "SummonerDot", itemInicial: "1054",
-        onda: "Ajude seu ADC a pegar nível 2 primeiro.",
-        early: "Use o Esfolar (E) para cancelar a espada zênite da Leona enquanto ela viaja pelo ar.",
-        regra: "Se você cancelar o salto da Leona com o seu E, ela fica no meio do caminho sem alcance para atordoar seu atirador."
+        onda: "Mantenha a onda equilibrada.",
+        early: "Ative o E do Jax assim que ela ativar o Q2 dela (o golpe de dano verdadeiro com barulho agudo).",
+        regra: "Quando ela pular na parede com o gancho, ligue o E imediatamente para negar o atordoamento e atordoá-la de volta."
       }
     ];
 
-    // CARREGAMENTO BLINDADO: SE VAZIO OU CORROMPIDO, RECUPERA NA HORA
+    // CARREGAMENTO SEGURO
     let matchups = [];
     try {
       const dadosLocais = JSON.parse(localStorage.getItem('grimorio_matchups'));
@@ -334,6 +331,116 @@
     let difAtiva = 'ALL';
     let champFiltroAtivo = '';
 
+    // GESTÃO DA CHAVE DE API GEMINI
+    function obterChaveIA() {
+      return localStorage.getItem('grimorio_gemini_api_key') || '';
+    }
+
+    function abrirModalChaveIA() {
+      document.getElementById('inputApiKey').value = obterChaveIA();
+      document.getElementById('modalChaveIA').classList.remove('hidden');
+    }
+
+    function fecharModalChaveIA() {
+      document.getElementById('modalChaveIA').classList.add('hidden');
+    }
+
+    function salvarChaveIA() {
+      const chave = document.getElementById('inputApiKey').value.trim();
+      if (chave) {
+        localStorage.setItem('grimorio_gemini_api_key', chave);
+        alert('Chave Gemini IA guardada com sucesso!');
+      } else {
+        localStorage.removeItem('grimorio_gemini_api_key');
+        alert('Chave removida.');
+      }
+      fecharModalChaveIA();
+      atualizarIndicadorChave();
+    }
+
+    function atualizarIndicadorChave() {
+      const btn = document.getElementById('btnConfigIA');
+      if (obterChaveIA()) {
+        btn.classList.add('border-amber-500/60', 'text-amber-300');
+      } else {
+        btn.classList.remove('border-amber-500/60', 'text-amber-300');
+      }
+    }
+
+    // CHAMADA AO MODELO GEMINI
+    async function gerarAnaliseIA() {
+      const chave = obterChaveIA();
+      if (!chave) {
+        alert('Por favor, configure primeiro a sua Chave Gemini IA no botão do topo!');
+        abrirModalChaveIA();
+        return;
+      }
+
+      const meuChamp = document.getElementById('meuCampeao').value.trim();
+      const opoChamp = document.getElementById('oponente').value.trim();
+      const rota = document.getElementById('rota').value;
+
+      if (!meuChamp || !opoChamp) {
+        alert('Preencha o seu campeão e o oponente primeiro para a IA analisar!');
+        return;
+      }
+
+      const btn = document.getElementById('btnGerarIA');
+      const textoOriginal = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> A analisar...`;
+      btn.disabled = true;
+
+      const prompt = `Você é um analista Challenger de League of Legends. Analise o confronto: ${meuChamp} (jogador) contra ${opoChamp} (oponente) na rota ${rota}.
+Retorne APENAS um objeto JSON válido (sem formatação markdown extra, sem crases no início ou fim, apenas o JSON puro) com a seguinte estrutura:
+{
+  "dificuldade": "Fácil" ou "Média" ou "Difícil" ou "Muito Difícil",
+  "spell1": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
+  "spell2": "SummonerFlash" ou "SummonerDot" ou "SummonerTeleport" ou "SummonerHaste" ou "SummonerSmite" ou "SummonerBarrier" ou "SummonerExhaust" ou "SummonerHeal",
+  "itemInicial": "1055" (Lâmina Doran) ou "1054" (Escudo Doran) ou "1056" (Anel Doran) ou "2033" (Poção Corrupta) ou "1036" (Espada Longa) ou "1082" (Lacre) ou "1039" (Jungle),
+  "onda": "Instrução concisa de 1 a 2 frases sobre gestão de onda/minions",
+  "early": "Dica prática de trocas nos níveis 1 a 3 em 1 a 2 frases",
+  "regra": "Regra fundamental ou habilidade crítica do adversário a respeitar em 1 a 2 frases"
+}`;
+
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${chave}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Erro na API da Google: verifique se a chave é válida e possui cota.');
+        }
+
+        const data = await response.json();
+        let respostaTexto = data.candidates[0].content.parts[0].text.trim();
+        respostaTexto = respostaTexto.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
+
+        const analise = JSON.parse(respostaTexto);
+
+        if (analise.dificuldade) document.getElementById('dificuldade').value = analise.dificuldade;
+        if (analise.spell1) document.getElementById('spell1').value = analise.spell1;
+        if (analise.spell2) document.getElementById('spell2').value = analise.spell2;
+        if (analise.itemInicial) document.getElementById('itemInicial').value = analise.itemInicial;
+        if (analise.onda) document.getElementById('onda').value = analise.onda;
+        if (analise.early) document.getElementById('early').value = analise.early;
+        if (analise.regra) document.getElementById('regra').value = analise.regra;
+
+        alert('Confronto analisado com sucesso pela IA! Verifique as notas e clique em Guardar.');
+      } catch (err) {
+        alert('Erro ao consultar a IA: ' + err.message);
+      } finally {
+        btn.innerHTML = textoOriginal;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    // RIOT DATA DRAGON
     const RIOT_VERSION = '14.10.1';
     let listaChamps = [];
 
@@ -387,27 +494,18 @@
     };
 
     function restaurarPadrao() {
-      if (confirm('Deseja restaurar todos os 10 confrontos padrão originais?')) {
+      if (confirm('Deseja restaurar a base de confrontos original?')) {
         matchups = [...dadosIniciais];
         localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
         champFiltroAtivo = '';
         const input = document.getElementById('campoMeuChamp');
         if (input) input.value = '';
         renderizarMatchups();
-        atualizarListaMeusCampeoes();
       }
     }
 
     function salvarNoLocalStorage() {
       localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
-      atualizarListaMeusCampeoes();
-    }
-
-    function atualizarListaMeusCampeoes() {
-      const datalist = document.getElementById('listaMeusChamps');
-      if (!datalist) return;
-      const campeoesUnicos = [...new Set(matchups.map(m => m.meuCampeao))].sort();
-      datalist.innerHTML = campeoesUnicos.map(champ => `<option value="${champ}"></option>`).join('');
     }
 
     function aoDigitarMeuCampeao(valor) {
@@ -479,8 +577,11 @@
         container.innerHTML = `
           <div class="col-span-full text-center py-16 text-slate-500">
             <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-            <p class="font-medium text-slate-400">Nenhum confronto localizado com os filtros selecionados.</p>
-            <button onclick="restaurarPadrao()" class="mt-3 text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition">Restaurar Confrontos Originais</button>
+            <p class="font-medium text-slate-400">Nenhum confronto localizado.</p>
+            <p class="text-xs mt-1 text-slate-500">Crie este confronto em 2 segundos com o Oráculo IA:</p>
+            <button onclick="abrirModalComCampeoes()" class="mt-3 text-xs bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg transition inline-flex items-center gap-1.5">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Gerar Análise deste Confronto com IA
+            </button>
           </div>
         `;
         lucide.createIcons();
@@ -600,8 +701,19 @@
     function abrirModalNovo() {
       document.getElementById('formMatchup').reset();
       document.getElementById('matchupId').value = '';
-      document.getElementById('tituloModal').innerText = 'Adicionar Novo Confronto';
+      document.getElementById('tituloModal').innerText = 'Adicionar Confronto';
       document.getElementById('modalForm').classList.remove('hidden');
+    }
+
+    function abrirModalComCampeoes() {
+      abrirModalNovo();
+      const meu = document.getElementById('campoMeuChamp').value.trim();
+      const opo = document.getElementById('campoBusca').value.trim();
+      if (meu) document.getElementById('meuCampeao').value = meu;
+      if (opo) document.getElementById('oponente').value = opo;
+      if (meu && opo) {
+        gerarAnaliseIA();
+      }
     }
 
     function fecharModal() {
@@ -656,7 +768,7 @@
     }
 
     function excluirMatchup(id) {
-      if (confirm('Tem certeza de que deseja apagar este confronto?')) {
+      if (confirm('Tem a certeza de que pretende eliminar este confronto?')) {
         matchups = matchups.filter(m => m.id !== id);
         salvarNoLocalStorage();
         renderizarMatchups();
@@ -687,16 +799,16 @@
             alert('Confrontos importados com sucesso!');
           }
         } catch (err) {
-          alert('Erro ao carregar o arquivo JSON.');
+          alert('Erro ao carregar o ficheiro JSON.');
         }
       };
       reader.readAsText(file);
     }
 
-    // INICIALIZAÇÃO IMEDIATA E SEM INTERRUPÇÕES
-    renderizarMatchups();
-    atualizarListaMeusCampeoes();
+    // INICIALIZAÇÃO
+    atualizarIndicadorChave();
     verificarParametrosUrl();
+    renderizarMatchups();
   </script>
 </body>
 </html>
