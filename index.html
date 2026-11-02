@@ -90,7 +90,7 @@
         <div class="md:col-span-3 bg-[#0a0e17]/90 border border-rose-500/40 rounded-xl p-4 flex items-center gap-4 shadow-inner">
           <div class="flex-1 text-right">
             <label class="block text-[11px] font-bold text-rose-400 uppercase tracking-wider mb-1">Contra oponente:</label>
-            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Belveth, Darius..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
+            <input type="text" id="oponenteChamp" list="listaCampeoes" oninput="atualizarAvatar('oponenteChamp', 'avatarOpo')" placeholder="Ex: Darius, Akali..." class="w-full bg-[#121a29] border border-hexborder rounded-lg px-3 py-2 text-sm text-slate-100 font-bold text-right focus:border-rose-400 focus:outline-none transition">
           </div>
           <img id="avatarOpo" src="https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg" class="w-14 h-14 rounded-full border-2 border-rose-500 object-cover shadow-lg shadow-rose-500/20 flex-shrink-0">
         </div>
@@ -156,7 +156,7 @@
               <i data-lucide="check-circle-2" class="w-4 h-4"></i> Custo Zero ($0)
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              A Groq oferece cotas gratuitas generosas sem necessidade de inserir cartão de crédito.
+              A Groq oferece cotas gratuitas generosas sem necessidade de cartão de crédito.
             </p>
           </div>
 
@@ -165,7 +165,7 @@
               <i data-lucide="gauge" class="w-4 h-4"></i> Sem Espera
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              As fichas táticas são geradas instantaneamente através dos chips LPU em frações de segundo.
+              Fichas geradas instantaneamente através dos chips LPU em frações de segundo.
             </p>
           </div>
         </div>
@@ -329,7 +329,7 @@
       return JSON.parse(limpo);
     }
 
-    // RESOLVE OS MODELOS DISPONÍVEIS DINAMICAMENTE NA CONTA GROQ
+    // DESCOBERTA AUTOMÁTICA DO MODELO REAL ATIVO NA SUA CHAVE GROQ
     async function dispararRequisicaoGroq(chave, meu, opo, rota) {
       const systemPrompt = `Você é um analista Challenger de League of Legends. Retorne ESTRITAMENTE um objeto JSON válido (sem introduções, sem markdown) com a seguinte estrutura:
 {
@@ -348,31 +348,30 @@
 
       const userPrompt = `Analise detalhadamente o confronto: Jogador joga de ${meu} contra ${opo} na rota ${rota}.`;
 
-      let modelosAtivos = [];
+      let modelosCandidatos = [];
 
-      // 1. Consulta dinâmica aos modelos ativos da API da Groq
+      // 1. Obtém a lista oficial de modelos autorizados na sua chave
       try {
         const resModels = await fetch('https://api.groq.com/openai/v1/models', {
           headers: { 'Authorization': `Bearer ${chave}` }
         });
         const dataModels = await resModels.json();
         if (dataModels.data && Array.isArray(dataModels.data)) {
-          // Filtra modelos Llama com suporte de chat
-          modelosAtivos = dataModels.data
+          // Filtra modelos de chat excluindo modelos de áudio (whisper) e de moderação
+          modelosCandidatos = dataModels.data
             .map(m => m.id)
-            .filter(id => id.includes('llama') && (id.includes('70b') || id.includes('8b')));
+            .filter(id => !id.includes('whisper') && !id.includes('guard'));
         }
       } catch (e) {}
 
-      // Se a listagem não retornar, utiliza os identificadores padrão atuais
-      if (modelosAtivos.length === 0) {
-        modelosAtivos = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+      if (modelosCandidatos.length === 0) {
+        throw new Error('Não foi possível obter os modelos ativos na sua conta Groq. Verifique a chave.');
       }
 
       let ultimoErro = '';
 
-      // 2. Executa a inferência no primeiro modelo válido
-      for (const modelo of modelosAtivos) {
+      // 2. Dispara o pedido com o primeiro modelo ativo disponível
+      for (const modelo of modelosCandidatos) {
         try {
           const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
