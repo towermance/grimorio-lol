@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grimório LoL - Seu Guia Tático de Matchups</title>
-  <!-- Tailwind CSS & Lucide Icons -->
+  <title>Grimório LoL - O Seu Guia Tático de Matchups</title>
+  <!-- Tailwind CSS & Ícones Lucide -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -29,20 +29,22 @@
   <header class="border-b border-hexborder bg-[#0f172a]/90 backdrop-blur sticky top-0 z-40">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-black font-black text-lg shadow-md shadow-amber-500/20">
-          G
-        </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-wide text-hexgold">Grimório LoL</h1>
-          <p class="text-xs text-slate-400">Caderno Tático de Confrontos & Counters</p>
-        </div>
+        <a href="?" class="flex items-center gap-3 group">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-600 to-amber-300 flex items-center justify-center text-black font-black text-lg shadow-md shadow-amber-500/20 group-hover:scale-105 transition">
+            G
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-wide text-hexgold">Grimório LoL</h1>
+            <p class="text-xs text-slate-400">Caderno Tático de Confrontos & Counters</p>
+          </div>
+        </a>
       </div>
       
       <div class="flex items-center gap-2">
-        <button onclick="exportarDados()" title="Transferir Backup (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
+        <button onclick="exportarDados()" title="Transferir Cópia de Segurança (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="download" class="w-4 h-4"></i>
         </button>
-        <label title="Restaurar Backup" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
+        <label title="Restaurar Cópia de Segurança" class="p-2 text-slate-400 hover:text-cyan-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition cursor-pointer">
           <i data-lucide="upload" class="w-4 h-4"></i>
           <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
         </label>
@@ -56,6 +58,27 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- SELETOR RÁPIDO: MODO CAMPEÃO PRINCIPAL -->
+    <div class="bg-gradient-to-r from-[#121a29] to-[#0f172a] border border-amber-500/30 p-4 rounded-xl mb-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
+          <i data-lucide="swords" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h2 class="text-sm font-bold text-slate-200">Com quem vai jogar agora?</h2>
+          <p class="text-xs text-slate-400">Filtre instantaneamente todos os confrontos do seu campeão</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 w-full md:w-auto">
+        <select id="seletorMeuChamp" onchange="selecionarMeuCampeao(this.value)" class="w-full md:w-64 bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm text-amber-300 font-semibold focus:border-hexgold focus:outline-none">
+          <option value="ALL">Mostrar todos os campeões</option>
+        </select>
+        <button onclick="limparFiltroChamp()" title="Limpar Seleção" class="p-2 text-slate-400 hover:text-slate-200 bg-slate-800 rounded-lg text-xs border border-hexborder transition">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
     <!-- BARRA DE PESQUISA E FILTROS -->
     <div class="bg-hexcard border border-hexborder p-4 rounded-xl mb-6 shadow-lg flex flex-col gap-4">
       <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -181,7 +204,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Vaga / Onda de Tropas</label>
+          <label class="block text-xs font-semibold text-slate-400 mb-1">Gestão de Onda / Vaga de Tropas</label>
           <input type="text" id="onda" placeholder="Ex: Deixar vir no nível 1 e congelar junto da torre" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
         </div>
 
@@ -215,7 +238,7 @@
         const datalist = document.getElementById('listaCampeoes');
         datalist.innerHTML = listaChamps.map(c => `<option value="${c}"></option>`).join('');
       } catch (err) {
-        console.warn('Usando nomes locais para os campeões');
+        console.warn('A utilizar registos locais');
       }
     }
     carregarCampeoesRiot();
@@ -269,7 +292,6 @@
       '1039': 'Cria-Caminho'
     };
 
-    // BASE DE DADOS EXPANDIDA COM OS CONFRONTOS MAIS POPULARES DO META
     const dadosIniciais = [
       {
         id: "1",
@@ -406,9 +428,47 @@
     let matchups = JSON.parse(localStorage.getItem('grimorio_matchups')) || dadosIniciais;
     let rotaAtiva = 'ALL';
     let difAtiva = 'ALL';
+    let champFiltroAtivo = 'ALL';
 
     function salvarNoLocalStorage() {
       localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
+      atualizarListaMeusCampeoes();
+    }
+
+    // ATUALIZA AS OPÇÕES DO SELETOR "VOU JOGAR COM..."
+    function atualizarListaMeusCampeoes() {
+      const seletor = document.getElementById('seletorMeuChamp');
+      const campeoesUnicos = [...new Set(matchups.map(m => m.meuCampeao))].sort();
+      
+      let html = '<option value="ALL">Mostrar todos os campeões</option>';
+      campeoesUnicos.forEach(champ => {
+        const selecionado = champFiltroAtivo === champ ? 'selected' : '';
+        html += `<option value="${champ}" ${selecionado}>A jogar de ${champ}</option>`;
+      });
+      seletor.innerHTML = html;
+    }
+
+    function selecionarMeuCampeao(champ) {
+      champFiltroAtivo = champ;
+      renderizarMatchups();
+    }
+
+    function limparFiltroChamp() {
+      champFiltroAtivo = 'ALL';
+      document.getElementById('seletorMeuChamp').value = 'ALL';
+      renderizarMatchups();
+    }
+
+    // PARTILHAR CONFRONTO VIA LINK DIRETO (URL)
+    function partilharLink(id) {
+      const m = matchups.find(item => item.id === id);
+      if (!m) return;
+      const urlBase = window.location.origin + window.location.pathname;
+      const urlPartilha = `${urlBase}?meu=${encodeURIComponent(m.meuCampeao)}&vs=${encodeURIComponent(m.oponente)}`;
+      
+      navigator.clipboard.writeText(urlPartilha).then(() => {
+        alert(`Ligação direta para ${m.meuCampeao} vs ${m.oponente} copiada!\nPode colar e enviar no Discord ou WhatsApp.`);
+      });
     }
 
     function copiarDicas(id) {
@@ -424,6 +484,22 @@ Regra: ${m.regra || 'N/A'}`;
       });
     }
 
+    // VERIFICA SE O LINK JÁ VEIO COM PARÂMETROS NA URL (?meu=...&vs=...)
+    function verificarParametrosUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const meu = params.get('meu');
+      const vs = params.get('vs');
+
+      if (meu) {
+        champFiltroAtivo = meu;
+        const seletor = document.getElementById('seletorMeuChamp');
+        if (seletor) seletor.value = meu;
+      }
+      if (vs) {
+        document.getElementById('campoBusca').value = vs;
+      }
+    }
+
     function renderizarMatchups() {
       const container = document.getElementById('gradeMatchups');
       const termo = document.getElementById('campoBusca').value.toLowerCase();
@@ -433,8 +509,9 @@ Regra: ${m.regra || 'N/A'}`;
       const filtrados = matchups.filter(m => {
         const correspondeRota = rotaAtiva === 'ALL' || m.rota === rotaAtiva;
         const correspondeDif = difAtiva === 'ALL' || m.dificuldade === difAtiva;
+        const correspondeMeuChamp = champFiltroAtivo === 'ALL' || m.meuCampeao.toLowerCase() === champFiltroAtivo.toLowerCase();
         const correspondeBusca = m.meuCampeao.toLowerCase().includes(termo) || m.oponente.toLowerCase().includes(termo);
-        return correspondeRota && correspondeDif && correspondeBusca;
+        return correspondeRota && correspondeDif && correspondeMeuChamp && correspondeBusca;
       });
 
       if (filtrados.length === 0) {
@@ -442,6 +519,7 @@ Regra: ${m.regra || 'N/A'}`;
           <div class="col-span-full text-center py-16 text-slate-500">
             <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
             <p class="font-medium text-slate-400">Nenhum confronto localizado com os filtros selecionados.</p>
+            <p class="text-xs mt-1 text-slate-500">Tente ajustar o campeão principal ou o termo de pesquisa.</p>
           </div>
         `;
         lucide.createIcons();
@@ -472,7 +550,8 @@ Regra: ${m.regra || 'N/A'}`;
                 <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
               </div>
               <div class="flex items-center gap-1">
-                <button onclick="copiarDicas('${m.id}')" title="Copiar Dicas" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
+                <button onclick="partilharLink('${m.id}')" title="Copiar Ligação Direta (URL)" class="p-1 text-slate-400 hover:text-amber-300 transition"><i data-lucide="share-2" class="w-4 h-4"></i></button>
+                <button onclick="copiarDicas('${m.id}')" title="Copiar Dicas de Texto" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
                 <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
                 <button onclick="excluirMatchup('${m.id}')" title="Eliminar" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
               </div>
@@ -653,6 +732,9 @@ Regra: ${m.regra || 'N/A'}`;
       reader.readAsText(file);
     }
 
+    // INICIALIZAÇÃO
+    atualizarListaMeusCampeoes();
+    verificarParametrosUrl();
     renderizarMatchups();
   </script>
 </body>
