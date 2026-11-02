@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Grimório LoL - O Seu Guia Tático de Matchups</title>
-  <!-- Tailwind CSS & Ícones Lucide -->
+  <!-- Tailwind CSS, Lucide Icons & Supabase Client -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -41,6 +42,14 @@
       </div>
       
       <div class="flex items-center gap-2">
+        <!-- ÁREA DE USUÁRIO / LOGIN SUPABASE -->
+        <div id="areaAuth" class="flex items-center gap-2">
+          <button onclick="abrirModalAuth()" id="btnAuth" class="border border-amber-500/40 hover:border-amber-400 text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i> Entrar
+          </button>
+        </div>
+
+        <!-- BOTÕES DE BACKUP -->
         <button onclick="exportarDados()" title="Transferir Cópia de Segurança (JSON)" class="p-2 text-slate-400 hover:text-amber-300 bg-slate-800/80 hover:bg-slate-700/80 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="download" class="w-4 h-4"></i>
         </button>
@@ -49,6 +58,7 @@
           <input type="file" id="importarArquivo" onchange="importarDados(event)" class="hidden" accept=".json">
         </label>
 
+        <!-- NOVO CONFRONTO -->
         <button onclick="abrirModalNovo()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-black font-semibold text-xs md:text-sm px-4 py-2 rounded-lg shadow-md transition flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           <span class="hidden sm:inline">Novo</span> Confronto
@@ -70,7 +80,6 @@
         </div>
       </div>
       
-      <!-- CAMPO DE DIGITAÇÃO DE CAMPEÃO -->
       <div class="flex items-center gap-2 w-full md:w-auto">
         <div class="relative w-full md:w-72">
           <i data-lucide="user-check" class="w-4 h-4 text-amber-400 absolute left-3 top-3"></i>
@@ -130,7 +139,34 @@
   <!-- LISTA GLOBAL DE CAMPEÕES RIOT -->
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL / FORMULÁRIO -->
+  <!-- MODAL DE LOGIN / CADASTRO -->
+  <div id="modalAuth" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-hexcard border border-hexborder w-full max-w-sm rounded-2xl p-6 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
+        <h3 id="authTitulo" class="text-base font-bold text-hexgold">Acessar Grimório em Nuvem</h3>
+        <button onclick="fecharModalAuth()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form onsubmit="realizarAutenticacao(event)" class="space-y-4 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1 font-semibold">E-mail</label>
+          <input type="email" id="authEmail" required placeholder="seuemail@exemplo.com" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1 font-semibold">Senha</label>
+          <input type="password" id="authSenha" required placeholder="Mínimo 6 caracteres" class="w-full bg-[#0a0e17] border border-hexborder rounded-lg px-3 py-2 text-sm focus:border-hexgold focus:outline-none">
+        </div>
+        <button type="submit" id="btnSubmitAuth" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-bold py-2 rounded-lg text-sm transition">
+          Entrar
+        </button>
+        <p class="text-center text-slate-400 pt-2">
+          <span id="authToggleTexto">Ainda não tem conta?</span>
+          <button type="button" onclick="alternarModoAuth()" id="authToggleBtn" class="text-amber-400 hover:underline font-semibold ml-1">Criar conta</button>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL / FORMULÁRIO DE CONFRONTO -->
   <div id="modalForm" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border border-hexborder w-full max-w-xl rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-hexborder pb-3 mb-4">
@@ -240,6 +276,15 @@
   </div>
 
   <script>
+    // CONFIGURAÇÃO OFICIAL DO SUPABASE
+    const SUPABASE_URL = 'https://lcmiddvyjntqasoisodg.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_YEhwSBc1ZcJRBB0_eW4Q3g_5DdnaBLh';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    let usuarioAtual = null;
+    let modoCadastro = false;
+
+    // RIOT DATA DRAGON
     const RIOT_VERSION = '14.10.1';
     let listaChamps = [];
 
@@ -249,502 +294,4 @@
         const data = await res.json();
         listaChamps = Object.keys(data.data);
         const datalist = document.getElementById('listaCampeoes');
-        datalist.innerHTML = listaChamps.map(c => `<option value="${c}"></option>`).join('');
-      } catch (err) {
-        console.warn('Usando nomes locais para os campeões');
-      }
-    }
-    carregarCampeoesRiot();
-
-    function tratarNomeRiot(nome) {
-      if (!nome) return '';
-      const limpo = nome.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-      const mapaEspecial = {
-        'wukong': 'MonkeyKing',
-        'monkeyking': 'MonkeyKing',
-        'nunu': 'Nunu',
-        'nunewillump': 'Nunu',
-        'renata': 'Renata',
-        'renataglasc': 'Renata',
-        'chogath': 'Chogath',
-        'velkoz': 'Velkoz',
-        'kaisa': 'Kaisa',
-        'khazix': 'Khazix',
-        'kogmaw': 'KogMaw',
-        'leblanc': 'Leblanc',
-        'belveth': 'Belveth',
-        'ksante': 'KSante'
-      };
-      if (mapaEspecial[limpo]) return mapaEspecial[limpo];
-      const encontrado = listaChamps.find(c => c.toLowerCase() === limpo);
-      if (encontrado) return encontrado;
-      return nome.trim().charAt(0).toUpperCase() + nome.trim().slice(1).replace(/\s+/g, '');
-    }
-
-    function getAvatarUrl(nome) {
-      const idRiot = tratarNomeRiot(nome);
-      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/champion/${idRiot}.png`;
-    }
-
-    function getSpellUrl(spellKey) {
-      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/spell/${spellKey}.png`;
-    }
-
-    function getItemUrl(itemId) {
-      return `https://ddragon.leagueoflegends.com/cdn/${RIOT_VERSION}/img/item/${itemId}.png`;
-    }
-
-    const nomesItens = {
-      '1055': 'Lâmina de Doran',
-      '1054': 'Escudo de Doran',
-      '1056': 'Anel de Doran',
-      '2033': 'Poção Corrupta',
-      '3070': 'Lágrima da Deusa',
-      '1036': 'Espada Longa',
-      '1082': 'Lacre Sombrio',
-      '1039': 'Cria-Caminho'
-    };
-
-    const dadosIniciais = [
-      {
-        id: "1",
-        meuCampeao: "Renekton",
-        oponente: "Aatrox",
-        rota: "TOP",
-        dificuldade: "Média",
-        spell1: "SummonerFlash",
-        spell2: "SummonerDot",
-        itemInicial: "1055",
-        onda: "Deixe a onda vir no nível 1 e congele perto da sua torre.",
-        early: "Evite o Q1 e Q2 dele. No nível 3, entre com E, comba com W fortalecido e volte com E2 antes do Q3 dele cair.",
-        regra: "Comprar bota de armadura ou corta-cura no primeiro retorno anula o sustento dele."
-      },
-      {
-        id: "2",
-        meuCampeao: "Darius",
-        oponente: "Garen",
-        rota: "TOP",
-        dificuldade: "Fácil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerHaste",
-        itemInicial: "1055",
-        onda: "Mantenha a onda lenta empurrando. Garen não pode encostar nos minions sem apanhar.",
-        early: "Quando ele vier dar o Q com velocidade, acerte o W para desacelerar e guarde seu puxão (E) para a fuga dele.",
-        regra: "Nunca gaste o puxão (E) à toa antes dele gastar a corrida."
-      },
-      {
-        id: "3",
-        meuCampeao: "Jax",
-        oponente: "Camille",
-        rota: "TOP",
-        dificuldade: "Fácil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerTeleport",
-        itemInicial: "1055",
-        onda: "Deixe a onda estável no meio até o nível 3.",
-        early: "Guarde o Contra-Ataque (E) para o segundo golpe do Q dela (dano verdadeiro).",
-        regra: "Quando ela pular na parede com o E, ative o seu E imediatamente para negar o atordoamento."
-      },
-      {
-        id: "4",
-        meuCampeao: "Fiora",
-        oponente: "Mordekaiser",
-        rota: "TOP",
-        dificuldade: "Média",
-        spell1: "SummonerFlash",
-        spell2: "SummonerDot",
-        itemInicial: "1055",
-        onda: "Evite ficar preso debaixo da torre dele. Manter a onda congelada no seu lado é o cenário perfeito.",
-        early: "Dance em volta dos vitais com o Q. Use o Ripostar (W) para bloquear o puxão (E) dele.",
-        regra: "Se reagir rápido, o W da Fiora pode bloquear a Ultimate do Mordekaiser enquanto ele ergue a maça."
-      },
-      {
-        id: "5",
-        meuCampeao: "Ahri",
-        oponente: "Zed",
-        rota: "MID",
-        dificuldade: "Difícil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerTeleport",
-        itemInicial: "1056",
-        onda: "Pressione no nível 1-2. Do nível 3 em diante, mantenha a onda equilibrada.",
-        early: "Puna quando ele usar a sombra (W) para farmar. Sem sombra, ele fica 20 segundos vulnerável a ganks.",
-        regra: "Se ele ultar em você, jogue o Charme (E) imediatamente para trás do seu próprio campeão onde ele vai surgir."
-      },
-      {
-        id: "6",
-        meuCampeao: "Yasuo",
-        oponente: "Syndra",
-        rota: "MID",
-        dificuldade: "Média",
-        spell1: "SummonerFlash",
-        spell2: "SummonerDot",
-        itemInicial: "1055",
-        onda: "Deixe empurrar em você até o nível 2. Não tome poke de graça no nível 1.",
-        early: "Use a parede de vento (W) para bloquear a dispersão das esferas (E) ou a Ultimate completa dela.",
-        regra: "Sem a Parede de Vento, não vá para cima se ela tiver as esferas prontas."
-      },
-      {
-        id: "7",
-        meuCampeao: "Sylas",
-        oponente: "Malphite",
-        rota: "MID",
-        dificuldade: "Muito Fácil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerTeleport",
-        itemInicial: "1056",
-        onda: "Puxe as primeiras ondas para garantir nível 2 e 3 rápido.",
-        early: "Você ganha todas as trocas curtas com W. O dano mágico do Sylas ignora o acúmulo de armadura do Malphite.",
-        regra: "Roube a ultimate dele no nível 6 e use para rodar pelo mapa (roam) nas rotas laterais."
-      },
-      {
-        id: "8",
-        meuCampeao: "Lee Sin",
-        oponente: "Master Yi",
-        rota: "JUNGLE",
-        dificuldade: "Fácil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerSmite",
-        itemInicial: "1039",
-        onda: "Invada a selva dele no nível 3 se ele começar no lado oposto.",
-        early: "O Yi precisa farmar até o nível 6. Aplique pressão máxima nas rotas antes que ele compre o primeiro item.",
-        regra: "No 1v1, guarde seu Chute (R) para cancelar o W (meditação) do Yi e corte a cura dele."
-      },
-      {
-        id: "9",
-        meuCampeao: "Jinx",
-        oponente: "Draven",
-        rota: "ADC",
-        dificuldade: "Muito Difícil",
-        spell1: "SummonerFlash",
-        spell2: "SummonerHeal",
-        itemInicial: "1055",
-        onda: "Deixe ele empurrar. Nunca dispute pressão de rota no nível 1 contra os machados giratórios.",
-        early: "Farme à distância máxima com os foguetes (Q). Jogue as mordidinhas (E) exatamente onde o machado dele vai cair.",
-        regra: "Se o Draven pegar 1 abate cedo, jogue sob torre e espere a ajuda do seu caçador."
-      },
-      {
-        id: "10",
-        meuCampeao: "Thresh",
-        oponente: "Leona",
-        rota: "SUP",
-        dificuldade: "Média",
-        spell1: "SummonerFlash",
-        spell2: "SummonerDot",
-        itemInicial: "1054",
-        onda: "Ajude seu ADC a pegar nível 2 primeiro.",
-        early: "Use o Esfolar (E) para cancelar a espada zênite da Leona enquanto ela viaja pelo ar.",
-        regra: "Se você cancelar o salto da Leona com o seu E, ela fica no meio do caminho sem alcance para atordoar seu atirador."
-      }
-    ];
-
-    let matchups = JSON.parse(localStorage.getItem('grimorio_matchups')) || dadosIniciais;
-    let rotaAtiva = 'ALL';
-    let difAtiva = 'ALL';
-    let champFiltroAtivo = '';
-
-    function salvarNoLocalStorage() {
-      localStorage.setItem('grimorio_matchups', JSON.stringify(matchups));
-      atualizarListaMeusCampeoes();
-    }
-
-    // ATUALIZA AS SUGESTÕES DO SELETOR SUPERIOR
-    function atualizarListaMeusCampeoes() {
-      const datalist = document.getElementById('listaMeusChamps');
-      const campeoesUnicos = [...new Set(matchups.map(m => m.meuCampeao))].sort();
-      datalist.innerHTML = campeoesUnicos.map(champ => `<option value="${champ}"></option>`).join('');
-    }
-
-    function aoDigitarMeuCampeao(valor) {
-      champFiltroAtivo = valor.trim();
-      renderizarMatchups();
-    }
-
-    function limparFiltroChamp() {
-      champFiltroAtivo = '';
-      document.getElementById('campoMeuChamp').value = '';
-      renderizarMatchups();
-    }
-
-    function partilharLink(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      const urlBase = window.location.origin + window.location.pathname;
-      const urlPartilha = `${urlBase}?meu=${encodeURIComponent(m.meuCampeao)}&vs=${encodeURIComponent(m.oponente)}`;
-      
-      navigator.clipboard.writeText(urlPartilha).then(() => {
-        alert(`Link direto para ${m.meuCampeao} vs ${m.oponente} copiado!\nPode enviar no Discord ou WhatsApp.`);
-      });
-    }
-
-    function copiarDicas(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      const texto = `[Grimório LoL] ${m.meuCampeao} vs ${m.oponente} (${m.rota})
-Dificuldade: ${m.dificuldade}
-Onda: ${m.onda || 'N/A'}
-Início: ${m.early || 'N/A'}
-Regra: ${m.regra || 'N/A'}`;
-      navigator.clipboard.writeText(texto).then(() => {
-        alert('Plano tático copiado com sucesso!');
-      });
-    }
-
-    function verificarParametrosUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const meu = params.get('meu');
-      const vs = params.get('vs');
-
-      if (meu) {
-        champFiltroAtivo = meu;
-        const inputMeu = document.getElementById('campoMeuChamp');
-        if (inputMeu) inputMeu.value = meu;
-      }
-      if (vs) {
-        document.getElementById('campoBusca').value = vs;
-      }
-    }
-
-    function renderizarMatchups() {
-      const container = document.getElementById('gradeMatchups');
-      const termo = document.getElementById('campoBusca').value.toLowerCase();
-      const meuFiltro = champFiltroAtivo.toLowerCase();
-      
-      container.innerHTML = '';
-
-      const filtrados = matchups.filter(m => {
-        const correspondeRota = rotaAtiva === 'ALL' || m.rota === rotaAtiva;
-        const correspondeDif = difAtiva === 'ALL' || m.dificuldade === difAtiva;
-        const correspondeMeuChamp = !meuFiltro || m.meuCampeao.toLowerCase().includes(meuFiltro);
-        const correspondeBusca = m.meuCampeao.toLowerCase().includes(termo) || 
-                                 m.oponente.toLowerCase().includes(termo) ||
-                                 (m.regra && m.regra.toLowerCase().includes(termo)) ||
-                                 (m.early && m.early.toLowerCase().includes(termo));
-        return correspondeRota && correspondeDif && correspondeMeuChamp && correspondeBusca;
-      });
-
-      if (filtrados.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-16 text-slate-500">
-            <i data-lucide="shield-alert" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
-            <p class="font-medium text-slate-400">Nenhum confronto localizado com os filtros selecionados.</p>
-            <p class="text-xs mt-1 text-slate-500">Tente ajustar o nome digitado no topo ou o termo de pesquisa.</p>
-          </div>
-        `;
-        lucide.createIcons();
-        return;
-      }
-
-      filtrados.forEach(m => {
-        const corDificuldade = {
-          'Fácil': 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-          'Média': 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-          'Difícil': 'text-orange-400 bg-orange-500/10 border-orange-500/20',
-          'Muito Difícil': 'text-rose-400 bg-rose-500/10 border-rose-500/20'
-        }[m.dificuldade] || 'text-slate-400 bg-slate-500/10 border-slate-500/20';
-
-        const imgMeu = getAvatarUrl(m.meuCampeao);
-        const imgOpo = getAvatarUrl(m.oponente);
-        const s1 = m.spell1 || 'SummonerFlash';
-        const s2 = m.spell2 || 'SummonerDot';
-        const itemId = m.itemInicial || '1055';
-
-        const card = document.createElement('div');
-        card.className = "bg-hexcard border border-hexborder hover:border-amber-500/40 transition duration-200 rounded-xl p-5 shadow-lg flex flex-col justify-between";
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-4 border-b border-hexborder/60 pb-3">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">${m.rota}</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded border ${corDificuldade}">${m.dificuldade}</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="partilharLink('${m.id}')" title="Copiar Link Direto" class="p-1 text-slate-400 hover:text-amber-300 transition"><i data-lucide="share-2" class="w-4 h-4"></i></button>
-                <button onclick="copiarDicas('${m.id}')" title="Copiar Dicas de Texto" class="p-1 text-slate-400 hover:text-cyan-400 transition"><i data-lucide="copy" class="w-4 h-4"></i></button>
-                <button onclick="editarMatchup('${m.id}')" title="Editar" class="p-1 text-slate-400 hover:text-amber-400 transition"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                <button onclick="excluirMatchup('${m.id}')" title="Eliminar" class="p-1 text-slate-400 hover:text-rose-400 transition"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-              </div>
-            </div>
-
-            <!-- VS BANNER COM FOTOS -->
-            <div class="flex items-center justify-around py-3 px-2 bg-[#0a0e17]/80 rounded-xl border border-hexborder/60 mb-3">
-              <div class="flex flex-col items-center gap-1 w-24">
-                <img src="${imgMeu}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.meuCampeao}" class="w-12 h-12 rounded-full border-2 border-amber-400/80 object-cover shadow-md shadow-amber-500/10">
-                <span class="text-xs font-bold text-amber-300 text-center truncate max-w-full">${m.meuCampeao}</span>
-              </div>
-
-              <span class="text-xs font-black tracking-widest text-slate-500 italic">VS</span>
-
-              <div class="flex flex-col items-center gap-1 w-24">
-                <img src="${imgOpo}" onerror="this.src='https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/29.jpg'" alt="${m.oponente}" class="w-12 h-12 rounded-full border-2 border-rose-500/80 object-cover shadow-md shadow-rose-500/10">
-                <span class="text-xs font-bold text-rose-300 text-center truncate max-w-full">${m.oponente}</span>
-              </div>
-            </div>
-
-            <!-- ITENS E FEITIÇOS -->
-            <div class="flex items-center justify-between px-3 py-2 bg-slate-900/40 rounded-lg border border-hexborder/40 mb-3 text-xs">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Feitiços:</span>
-                <img src="${getSpellUrl(s1)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 1">
-                <img src="${getSpellUrl(s2)}" class="w-5 h-5 rounded border border-amber-500/40" title="Feitiço 2">
-              </div>
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] uppercase font-bold text-slate-400">Início:</span>
-                <img src="${getItemUrl(itemId)}" class="w-5 h-5 rounded border border-cyan-500/40" title="${nomesItens[itemId] || 'Item'}">
-                <span class="text-[11px] text-slate-300 font-medium">${nomesItens[itemId] || 'Item'}</span>
-              </div>
-            </div>
-
-            <!-- DICAS TÁTICAS -->
-            <div class="space-y-2.5 text-xs">
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="waves" class="w-3.5 h-3.5 text-cyan-400"></i> Gestão de Onda
-                </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.onda || 'Não informado.'}</p>
-              </div>
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i> Nível 1 ao 3
-                </p>
-                <p class="text-slate-300 bg-slate-900/70 p-2 rounded-lg border border-slate-800/80 leading-relaxed">${m.early || 'Não informado.'}</p>
-              </div>
-              <div>
-                <p class="font-bold text-slate-400 flex items-center gap-1.5 mb-0.5">
-                  <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> Regra Fundamental
-                </p>
-                <p class="text-amber-200/90 bg-amber-950/20 p-2 rounded-lg border border-amber-900/40 leading-relaxed font-medium">${m.regra || 'Não informado.'}</p>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-
-      lucide.createIcons();
-    }
-
-    function filtrarRota(rota, elemento) {
-      rotaAtiva = rota;
-      document.querySelectorAll('.btn-rota').forEach(btn => {
-        btn.classList.remove('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
-        btn.classList.add('bg-slate-800', 'text-slate-400');
-      });
-      elemento.classList.add('active', 'bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
-      elemento.classList.remove('bg-slate-800', 'text-slate-400');
-      renderizarMatchups();
-    }
-
-    function filtrarDificuldade(dif, elemento) {
-      difAtiva = dif;
-      document.querySelectorAll('.btn-dif').forEach(btn => {
-        btn.classList.remove('active', 'bg-slate-800', 'text-slate-300');
-        btn.classList.add('bg-slate-800/60');
-      });
-      elemento.classList.add('active', 'bg-slate-800', 'text-slate-300');
-      renderizarMatchups();
-    }
-
-    function abrirModalNovo() {
-      document.getElementById('formMatchup').reset();
-      document.getElementById('matchupId').value = '';
-      document.getElementById('tituloModal').innerText = 'Adicionar Novo Confronto';
-      document.getElementById('modalForm').classList.remove('hidden');
-    }
-
-    function fecharModal() {
-      document.getElementById('modalForm').classList.add('hidden');
-    }
-
-    function editarMatchup(id) {
-      const m = matchups.find(item => item.id === id);
-      if (!m) return;
-      document.getElementById('matchupId').value = m.id;
-      document.getElementById('meuCampeao').value = m.meuCampeao;
-      document.getElementById('oponente').value = m.oponente;
-      document.getElementById('rota').value = m.rota;
-      document.getElementById('dificuldade').value = m.dificuldade;
-      document.getElementById('spell1').value = m.spell1 || 'SummonerFlash';
-      document.getElementById('spell2').value = m.spell2 || 'SummonerTeleport';
-      document.getElementById('itemInicial').value = m.itemInicial || '1055';
-      document.getElementById('onda').value = m.onda || '';
-      document.getElementById('early').value = m.early || '';
-      document.getElementById('regra').value = m.regra || '';
-      
-      document.getElementById('tituloModal').innerText = 'Editar Confronto';
-      document.getElementById('modalForm').classList.remove('hidden');
-    }
-
-    function salvarMatchup(e) {
-      e.preventDefault();
-      const id = document.getElementById('matchupId').value;
-      const novo = {
-        id: id || Date.now().toString(),
-        meuCampeao: document.getElementById('meuCampeao').value.trim(),
-        oponente: document.getElementById('oponente').value.trim(),
-        rota: document.getElementById('rota').value,
-        dificuldade: document.getElementById('dificuldade').value,
-        spell1: document.getElementById('spell1').value,
-        spell2: document.getElementById('spell2').value,
-        itemInicial: document.getElementById('itemInicial').value,
-        onda: document.getElementById('onda').value.trim(),
-        early: document.getElementById('early').value.trim(),
-        regra: document.getElementById('regra').value.trim()
-      };
-
-      if (id) {
-        matchups = matchups.map(m => m.id === id ? novo : m);
-      } else {
-        matchups.unshift(novo);
-      }
-
-      salvarNoLocalStorage();
-      fecharModal();
-      renderizarMatchups();
-    }
-
-    function excluirMatchup(id) {
-      if (confirm('Tem a certeza de que pretende eliminar este confronto?')) {
-        matchups = matchups.filter(m => m.id !== id);
-        salvarNoLocalStorage();
-        renderizarMatchups();
-      }
-    }
-
-    function exportarDados() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(matchups, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `grimorio_lol_backup_${new Date().toISOString().slice(0,10)}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    }
-
-    function importarDados(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const importados = JSON.parse(evt.target.result);
-          if (Array.isArray(importados)) {
-            matchups = importados;
-            salvarNoLocalStorage();
-            renderizarMatchups();
-            alert('Confrontos importados com sucesso!');
-          }
-        } catch (err) {
-          alert('Erro ao carregar o ficheiro JSON.');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    // INICIALIZAÇÃO
-    atualizarListaMeusCampeoes();
-    verificarParametrosUrl();
-    renderizarMatchups();
-  </script>
-</body>
-</html>
+        datalist.innerHTML = listaChamps.map(c => `<option value="${c}
