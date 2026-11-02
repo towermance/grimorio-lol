@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grimório LoL - Oráculo Tático com IA</title>
+  <title>Grimório LoL - Oráculo Tático Ultrarrápido</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script>
@@ -33,14 +33,14 @@
         </div>
         <div>
           <h1 class="text-base font-bold text-hexgold tracking-wide">Grimório LoL</h1>
-          <p class="text-[11px] text-slate-400">Oráculo Tático em Tempo Real com IA</p>
+          <p class="text-[11px] text-slate-400">Oráculo Tático em Tempo Real • Motor Groq Llama 3</p>
         </div>
       </div>
       
       <div class="flex items-center gap-2">
-        <button onclick="abrirModalChaveIA(false)" id="btnConfigIA" title="Configurar Chave Gemini IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
-          <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
-          <span id="textoStatusChave">Configurar Chave IA</span>
+        <button onclick="abrirModalChaveGroq(false)" id="btnConfigIA" title="Configurar Chave Groq IA" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-1.5">
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span id="textoStatusChave">Configurar Chave Groq</span>
         </button>
         <button onclick="limparHistorico()" title="Limpar histórico local" class="p-2 text-slate-400 hover:text-rose-400 bg-slate-800/60 rounded-lg text-xs border border-hexborder transition">
           <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -57,9 +57,11 @@
       <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div class="text-center max-w-lg mx-auto mb-6">
-        <span class="text-[10px] uppercase font-black tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">Inteligência Tática</span>
+        <span class="text-[10px] uppercase font-black tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1 w-max mx-auto">
+          <i data-lucide="zap" class="w-3 h-3"></i> Resposta Instantânea Groq LPU
+        </span>
         <h2 class="text-xl md:text-2xl font-black text-slate-100 mt-2">Qual confronto vamos vencer agora?</h2>
-        <p class="text-xs text-slate-400 mt-1">Escolha os dois campeões e a rota para gerar a estratégia completa na hora.</p>
+        <p class="text-xs text-slate-400 mt-1">Escolha os dois campeões e a rota para gerar a estratégia completa em menos de 1 segundo.</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-7 gap-4 items-center">
@@ -96,9 +98,9 @@
 
       <!-- BOTÃO INVOCAR ORÁCULO -->
       <div class="mt-6 flex justify-center">
-        <button onclick="invocarOraculoIA()" id="btnInvocar" class="w-full md:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.99] transition flex items-center justify-center gap-2">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span id="btnInvocarTexto">Consultar Oráculo (IA)</span>
+        <button onclick="invocarOraculoGroq()" id="btnInvocar" class="w-full md:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-sm uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:scale-[1.02] active:scale-[0.99] transition flex items-center justify-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4"></i>
+          <span id="btnInvocarTexto">Consultar Oráculo (Groq IA)</span>
         </button>
       </div>
     </div>
@@ -130,20 +132,20 @@
 
   <datalist id="listaCampeoes"></datalist>
 
-  <!-- MODAL DE ATIVAÇÃO DA CHAVE -->
-  <div id="modalChaveIA" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+  <!-- MODAL DE ATIVAÇÃO DA CHAVE GROQ -->
+  <div id="modalChaveGroq" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
     <div class="bg-hexcard border-2 border-amber-500/40 w-full max-w-lg rounded-2xl p-6 md:p-7 shadow-2xl relative">
-      <button id="btnFecharModalChave" onclick="fecharModalChaveIA()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
+      <button id="btnFecharModalChave" onclick="fecharModalChaveGroq()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="flex items-center gap-3 border-b border-hexborder/80 pb-4 mb-4">
         <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 flex-shrink-0">
-          <i data-lucide="key" class="w-5 h-5"></i>
+          <i data-lucide="zap" class="w-5 h-5"></i>
         </div>
         <div>
-          <h3 class="text-base font-bold text-slate-100">Ativação do Oráculo IA</h3>
-          <p class="text-xs text-amber-400 font-medium">100% Gratuito • Sem necessidade de plano pago</p>
+          <h3 class="text-base font-bold text-slate-100">Ativação do Motor Groq</h3>
+          <p class="text-xs text-emerald-400 font-medium">100% Gratuito • Velocidade Extrema (&lt; 1s)</p>
         </div>
       </div>
 
@@ -154,35 +156,35 @@
               <i data-lucide="check-circle-2" class="w-4 h-4"></i> Custo Zero ($0)
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              <strong>Não requer plano pago.</strong> A Google disponibiliza cotas gratuitas diárias pelo AI Studio.
+              A Groq oferece cotas gratuitas generosas sem necessidade de inserir cartão de crédito.
             </p>
           </div>
 
           <div class="bg-cyan-500/10 border border-cyan-500/30 rounded-xl p-3">
             <div class="flex items-center gap-1.5 text-cyan-400 font-bold text-xs mb-1">
-              <i data-lucide="hard-drive" class="w-4 h-4"></i> Quase Zero Espaço
+              <i data-lucide="gauge" class="w-4 h-4"></i> Sem Lentidão
             </div>
             <p class="text-slate-300 text-[11px] leading-relaxed">
-              O sistema guarda apenas texto leve no seu navegador (alguns kilobytes). Seu computador ou dispositivo <strong>não ficam lentos</strong>.
+              As fichas táticas são geradas instantaneamente através do modelo Llama 3 70B com resposta em frações de segundo.
             </p>
           </div>
         </div>
 
         <div>
-          <label class="block text-slate-300 mb-1 font-semibold">Cole sua Chave do Gemini (começa com AIza...):</label>
-          <input type="password" id="inputApiKey" placeholder="AIzaSy..." class="w-full bg-[#0a0e17] border border-amber-500/40 rounded-lg px-3 py-2.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none shadow-inner">
+          <label class="block text-slate-300 mb-1 font-semibold">Cole a sua Chave da Groq (começa com gsk_...):</label>
+          <input type="password" id="inputApiKey" placeholder="gsk_..." class="w-full bg-[#0a0e17] border border-amber-500/40 rounded-lg px-3 py-2.5 text-sm text-amber-300 font-mono focus:border-amber-400 focus:outline-none shadow-inner">
         </div>
 
         <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
-          <p class="font-bold text-slate-200">Como obter a chave gratuita em 1 minuto:</p>
-          <p>1. Acesse o site oficial: <a href="https://aistudio.google.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">aistudio.google.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
-          <p>2. Inicie sessão com sua conta Google.</p>
-          <p>3. Clique em <strong>Get API key</strong> &gt; <strong>Create API key</strong>, copie e cole acima.</p>
+          <p class="font-bold text-slate-200">Como obter a chave gratuita em 30 segundos:</p>
+          <p>1. Aceda ao portal: <a href="https://console.groq.com" target="_blank" class="text-amber-400 font-bold hover:underline inline-flex items-center gap-1">console.groq.com <i data-lucide="external-link" class="w-3 h-3"></i></a></p>
+          <p>2. Inicie sessão com a sua conta Google.</p>
+          <p>3. Clique em <strong>API Keys</strong> &gt; <strong>Create API Key</strong>, copie e cole acima.</p>
         </div>
 
         <div class="flex items-center justify-between pt-2">
-          <span class="text-[10px] text-slate-500">A chave fica guardada apenas no seu navegador.</span>
-          <button type="button" onclick="salvarChaveIA()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-black text-xs px-6 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5">
+          <span class="text-[10px] text-slate-500">A chave fica gravada apenas no seu navegador.</span>
+          <button type="button" onclick="salvarChaveGroq()" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-black text-xs px-6 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 transition flex items-center gap-1.5">
             <i data-lucide="shield-check" class="w-4 h-4"></i> Ativar Grimório
           </button>
         </div>
@@ -254,68 +256,68 @@
       }
     }
 
-    function obterChaveIA() {
-      return localStorage.getItem('grimorio_gemini_api_key') || '';
+    function obterChaveGroq() {
+      return localStorage.getItem('grimorio_groq_api_key') || '';
     }
 
-    function abrirModalChaveIA(obrigatorio = false) {
-      document.getElementById('inputApiKey').value = obterChaveIA();
+    function abrirModalChaveGroq(obrigatorio = false) {
+      document.getElementById('inputApiKey').value = obterChaveGroq();
       const btnFechar = document.getElementById('btnFecharModalChave');
       if (obrigatorio) {
         btnFechar.classList.add('hidden');
       } else {
         btnFechar.classList.remove('hidden');
       }
-      document.getElementById('modalChaveIA').classList.remove('hidden');
+      document.getElementById('modalChaveGroq').classList.remove('hidden');
       lucide.createIcons();
     }
 
-    function fecharModalChaveIA() {
-      if (!obterChaveIA()) {
-        alert('O Grimório necessita da chave gratuita do Gemini para funcionar. Por favor, cole a sua chave para continuar.');
+    function fecharModalChaveGroq() {
+      if (!obterChaveGroq()) {
+        alert('O Grimório necessita da chave gratuita da Groq para funcionar. Por favor, cole a sua chave para continuar.');
         return;
       }
-      document.getElementById('modalChaveIA').classList.add('hidden');
+      document.getElementById('modalChaveGroq').classList.add('hidden');
     }
 
-    function salvarChaveIA() {
+    function salvarChaveGroq() {
       const chave = document.getElementById('inputApiKey').value.trim();
-      if (!chave || chave.length < 15) {
-        alert('Por favor, cole uma chave válida obtida gratuitamente no Google AI Studio (começa com AIza...).');
+      if (!chave || !chave.startsWith('gsk_')) {
+        alert('Por favor, cole uma chave válida obtida gratuitamente no console.groq.com (começa com gsk_...).');
         return;
       }
 
-      localStorage.setItem('grimorio_gemini_api_key', chave);
-      document.getElementById('modalChaveIA').classList.add('hidden');
+      localStorage.setItem('grimorio_groq_api_key', chave);
+      document.getElementById('modalChaveGroq').classList.add('hidden');
       atualizarStatusChave();
-      alert('Chave ativada com sucesso! O Grimório está pronto para uso.');
+      alert('Chave Groq ativada com sucesso! O Grimório está pronto para uso instantâneo.');
     }
 
     function verificarChaveNaInicializacao() {
-      if (!obterChaveIA()) {
-        abrirModalChaveIA(true);
+      if (!obterChaveGroq()) {
+        abrirModalChaveGroq(true);
       } else {
         atualizarStatusChave();
       }
     }
 
     function atualizarStatusChave() {
-      const temChave = !!obterChaveIA();
+      const temChave = !!obterChaveGroq();
       const texto = document.getElementById('textoStatusChave');
       const btn = document.getElementById('btnConfigIA');
       if (temChave) {
-        texto.innerText = 'Chave IA Ativa';
+        texto.innerText = 'Chave Groq Ativa';
         btn.classList.add('border-emerald-500/50', 'text-emerald-300', 'bg-emerald-500/10');
         btn.classList.remove('border-amber-500/30', 'text-amber-300', 'bg-amber-500/10');
       } else {
-        texto.innerText = 'Configurar Chave IA';
+        texto.innerText = 'Configurar Chave Groq';
         btn.classList.remove('border-emerald-500/50', 'text-emerald-300', 'bg-emerald-500/10');
         btn.classList.add('border-amber-500/30', 'text-amber-300', 'bg-amber-500/10');
       }
     }
 
     function extrairJsonPuro(texto) {
-      if (!texto) throw new Error('Resposta vazia da IA.');
+      if (!texto) throw new Error('Resposta vazia do motor IA.');
       let limpo = texto.trim();
       limpo = limpo.replace(/```json/gi, '').replace(/```/g, '').trim();
 
@@ -327,61 +329,55 @@
       return JSON.parse(limpo);
     }
 
-    // RESOLVE O MODELO ATIVO DA SUA CONTA DINAMICAMENTE
-    async function dispararRequisicaoGemini(chave, prompt) {
-      let modelosValidos = [];
+    // CHAMADA DIRETA E INSTANTÂNEA À GROQ COM MODO JSON ATIVO
+    async function dispararRequisicaoGroq(chave, meu, opo, rota) {
+      const systemPrompt = `Você é um analista Challenger de League of Legends. Retorne ESTRITAMENTE um objeto JSON válido (sem introduções, sem markdown) com a seguinte estrutura:
+{
+  "dificuldade": "Fácil" | "Média" | "Difícil" | "Muito Difícil",
+  "spell1": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "spell2": "SummonerFlash" | "SummonerDot" | "SummonerTeleport" | "SummonerHaste" | "SummonerSmite" | "SummonerBarrier" | "SummonerExhaust" | "SummonerHeal",
+  "itemInicial": "1055" | "1054" | "1056" | "2033" | "1036" | "1082" | "1039",
+  "runaPrincipal": "Nome da Runa Chave ideal com breve justificativa de 5 palavras",
+  "itemPrioritario": "Primeiro item fechado prioritário para anular o oponente",
+  "powerSpike": "Momento exato de força no duelo (ex: Nível 2, Nível 6, 1º Item)",
+  "lutasObjetivos": "Postura nas lutas de dragão/barão e rota lateral",
+  "onda": "Instrução tática objetiva de controle de onda de tropas",
+  "early": "Guia prático de postura e trocas nos níveis 1 ao 3",
+  "regra": "Habilidade crítica do oponente para desviar ou segredo essencial da vitória"
+}`;
 
-      try {
-        const resLista = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${chave}`);
-        const dataLista = await resLista.json();
-        if (dataLista.models && Array.isArray(dataLista.models)) {
-          modelosValidos = dataLista.models
-            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
-            .map(m => m.name);
-        }
-      } catch (e) {}
+      const userPrompt = `Analise detalhadamente o confronto: Jogador joga de ${meu} contra ${opo} na rota ${rota}.`;
 
-      if (modelosValidos.length === 0) {
-        modelosValidos = ['models/gemini-1.5-flash', 'models/gemini-1.5-pro', 'models/gemini-3.8-flash'];
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${chave}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          response_format: { type: 'json_object' },
+          temperature: 0.2
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error?.message || 'Falha ao autenticar com a API da Groq.');
       }
 
-      let ultimoErro = '';
-
-      for (const modeloPath of modelosValidos) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/${modeloPath}:generateContent?key=${chave}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseMimeType: "application/json"
-              }
-            })
-          });
-
-          const data = await res.json();
-
-          if (res.ok && data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            return data.candidates[0].content.parts[0].text;
-          }
-
-          if (data.error) {
-            ultimoErro = data.error.message;
-          }
-        } catch (e) {
-          ultimoErro = e.message;
-        }
-      }
-
-      throw new Error(ultimoErro || 'Servidores temporariamente instáveis. Tente novamente em instantes.');
+      return data.choices[0].message.content;
     }
 
-    async function invocarOraculoIA() {
-      const chave = obterChaveIA();
+    async function invocarOraculoGroq() {
+      const chave = obterChaveGroq();
       if (!chave) {
-        abrirModalChaveIA(true);
+        abrirModalChaveGroq(true);
         return;
       }
 
@@ -403,34 +399,11 @@
 
       const btn = document.getElementById('btnInvocar');
       const htmlOriginal = btn.innerHTML;
-      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> O Oráculo está analisando...`;
+      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> A calcular estratégia...`;
       btn.disabled = true;
 
-      const prompt = `Analise detalhadamente o confronto no League of Legends:
-Jogador: ${meu}
-Oponente: ${opo}
-Rota: ${rota}
-
-Responda preenchendo obrigatoriamente este formato JSON:
-{
-  "dificuldade": "Fácil",
-  "spell1": "SummonerFlash",
-  "spell2": "SummonerDot",
-  "itemInicial": "1055",
-  "runaPrincipal": "Nome da Runa Chave ideal com uma breve justificativa de 5 palavras",
-  "itemPrioritario": "Primeiro grande item crítico a ser construído para anular o oponente",
-  "powerSpike": "Momento exato de pico de poder no confronto (ex: Nível 2, Nível 6, 1º Item Fechado)",
-  "lutasObjetivos": "Condição de vitória e posicionamento nas lutas de dragão/barão e rota lateral",
-  "onda": "Instrução tática objetiva de controle de onda de tropas",
-  "early": "Guia detalhado de trocas e postura nos níveis 1 ao 3",
-  "regra": "Habilidade crítica do oponente para desviar ou segredo essencial do duelo"
-}
-Valores aceitos em dificuldade: Fácil, Média, Difícil, Muito Difícil.
-Valores aceitos em spell1 e spell2: SummonerFlash, SummonerDot, SummonerTeleport, SummonerHaste, SummonerSmite, SummonerBarrier, SummonerExhaust, SummonerHeal.
-Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
-
       try {
-        const respostaTexto = await dispararRequisicaoGemini(chave, prompt);
+        const respostaTexto = await dispararRequisicaoGroq(chave, meu, opo, rota);
         const analise = extrairJsonPuro(respostaTexto);
 
         const novoConfronto = {
@@ -455,7 +428,7 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
         exibirCardResultado(novoConfronto);
         renderizarHistorico();
       } catch (err) {
-        alert('Erro ao consultar a IA: ' + err.message);
+        alert('Erro ao consultar a Groq: ' + err.message);
       } finally {
         btn.innerHTML = htmlOriginal;
         btn.disabled = false;
@@ -481,7 +454,7 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
             <span class="text-xs font-black px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">${m.rota}</span>
             <span class="text-xs font-bold px-2.5 py-1 rounded border ${corDificuldade}">${m.dificuldade}</span>
           </div>
-          <span class="text-[11px] text-amber-400 font-semibold flex items-center gap-1"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Análise de Mestre</span>
+          <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Groq LPU Instantâneo</span>
         </div>
 
         <!-- DOCK DE VS COM FOTOS -->
@@ -514,12 +487,12 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
 
           <div class="bg-slate-900/60 p-3 rounded-xl border border-hexborder/40 text-xs flex flex-col justify-center">
             <span class="text-[10px] uppercase font-bold text-amber-400 flex items-center gap-1"><i data-lucide="zap" class="w-3.5 h-3.5"></i> Runa Chave</span>
-            <p class="text-slate-200 font-semibold text-xs mt-0.5">${m.runaPrincipal || 'Conquistador / Runa Padrão'}</p>
+            <p class="text-slate-200 font-semibold text-xs mt-0.5">${m.runaPrincipal}</p>
           </div>
 
           <div class="bg-slate-900/60 p-3 rounded-xl border border-hexborder/40 text-xs flex flex-col justify-center">
             <span class="text-[10px] uppercase font-bold text-cyan-400 flex items-center gap-1"><i data-lucide="sword" class="w-3.5 h-3.5"></i> 1º Item Crítico</span>
-            <p class="text-slate-200 font-semibold text-xs mt-0.5 truncate">${m.itemPrioritario || 'Item Lendário Principal'}</p>
+            <p class="text-slate-200 font-semibold text-xs mt-0.5 truncate">${m.itemPrioritario}</p>
           </div>
         </div>
 
@@ -527,11 +500,11 @@ Valores aceitos em itemInicial: 1055, 1054, 1056, 2033, 1036, 1082, 1039.`;
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 text-xs">
           <div class="bg-[#0a0e17]/80 p-3 rounded-xl border border-amber-500/20">
             <span class="font-bold text-amber-400 flex items-center gap-1.5 mb-1"><i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Power Spike (Janela de Força)</span>
-            <p class="text-slate-300 leading-relaxed text-[11px]">${m.powerSpike || 'Nível 6'}</p>
+            <p class="text-slate-300 leading-relaxed text-[11px]">${m.powerSpike}</p>
           </div>
           <div class="bg-[#0a0e17]/80 p-3 rounded-xl border border-cyan-500/20">
             <span class="font-bold text-cyan-400 flex items-center gap-1.5 mb-1"><i data-lucide="users" class="w-3.5 h-3.5"></i> Lutas de Dragão & Objetivos</span>
-            <p class="text-slate-300 leading-relaxed text-[11px]">${m.lutasObjetivos || 'Lute agrupado e controle a visão dos flancos.'}</p>
+            <p class="text-slate-300 leading-relaxed text-[11px]">${m.lutasObjetivos}</p>
           </div>
         </div>
 
